@@ -1,0 +1,721 @@
+<title>Dukandar — screen mockups v1.2</title>
+<style>
+:root{
+  color-scheme: light dark;
+  --bg:#F3F4EF; --surface:#FFFFFF; --surface-2:#EBEDE6;
+  --ink:#1B221F; --muted:#5C6660; --line:#DCDFD6;
+  --accent:#0F6B5C; --accent-ink:#083F35; --accent-bg:#E1F0EB;
+  --warm:#C9862B; --warm-ink:#6E4813; --warm-bg:#FBEEDA;
+  --good:#2E8B57; --good-bg:#E4F3EA; --good-ink:#1B5F3B;
+  --warn:#C9862B; --warn-bg:#FBEEDA; --warn-ink:#6E4813;
+  --bad:#B3432E; --bad-bg:#FBE7E2; --bad-ink:#7A2C1C;
+  --radius:10px;
+  --serif: ui-serif, Georgia, 'Times New Roman', serif;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#15201C; --surface:#1C2824; --surface-2:#223029;
+    --ink:#EAF1EC; --muted:#9FB0A6; --line:#2E3D36;
+    --accent:#3FBE9B; --accent-ink:#BFF0E0; --accent-bg:#1E3A32;
+    --warm:#E0A852; --warm-ink:#F5DDB0; --warm-bg:#3C2F18;
+    --good:#57C78B; --good-bg:#1C3628; --good-ink:#B9F0D2;
+    --warn:#E0A852; --warn-bg:#3C2F18; --warn-ink:#F5DDB0;
+    --bad:#E27860; --bad-bg:#3D231C; --bad-ink:#F6C7B8;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15201C; --surface:#1C2824; --surface-2:#223029;
+  --ink:#EAF1EC; --muted:#9FB0A6; --line:#2E3D36;
+  --accent:#3FBE9B; --accent-ink:#BFF0E0; --accent-bg:#1E3A32;
+  --warm:#E0A852; --warm-ink:#F5DDB0; --warm-bg:#3C2F18;
+  --good:#57C78B; --good-bg:#1C3628; --good-ink:#B9F0D2;
+  --warn:#E0A852; --warn-bg:#3C2F18; --warn-ink:#F5DDB0;
+  --bad:#E27860; --bad-bg:#3D231C; --bad-ink:#F6C7B8;
+}
+:root[data-theme="light"]{
+  --bg:#F3F4EF; --surface:#FFFFFF; --surface-2:#EBEDE6;
+  --ink:#1B221F; --muted:#5C6660; --line:#DCDFD6;
+  --accent:#0F6B5C; --accent-ink:#083F35; --accent-bg:#E1F0EB;
+  --warm:#C9862B; --warm-ink:#6E4813; --warm-bg:#FBEEDA;
+}
+*{box-sizing:border-box}
+body,html{margin:0; color:var(--ink)}
+.app{font-family:var(--sans); color:var(--ink); background:var(--bg); min-height:100vh; overflow-x:auto; position:relative}
+.app,.app *{color:inherit}
+td,th,strong,p,span,div,label,button,select,option,input,h1,h2,h3{color:inherit}
+.shell{display:grid; grid-template-columns:220px 1fr; min-width:980px}
+.shell.loggedout{grid-template-columns:1fr}
+.shell.loggedout .rail{display:none}
+.rail{background:var(--surface); border-right:1px solid var(--line); padding:20px 14px; display:flex; flex-direction:column; gap:2px}
+.brand{font-family:var(--serif); font-size:22px; font-weight:700; color:var(--accent); padding:4px 10px 18px}
+.brand span{color:var(--muted); font-family:var(--sans); font-weight:400; font-size:12px; display:block; letter-spacing:.06em; text-transform:uppercase; margin-top:2px}
+.navbtn{display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; border:none; background:transparent; color:var(--muted); font-size:14px; text-align:left; cursor:pointer; font-family:var(--sans)}
+.navbtn:hover{background:var(--surface-2); color:var(--ink)}
+.navbtn.active{background:var(--accent-bg); color:var(--accent-ink); font-weight:600}
+.navbtn .dot{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.navbtn.active .dot{background:var(--accent)}
+.railfoot{margin-top:auto; padding-top:14px; border-top:1px solid var(--line); font-size:11px; color:var(--muted)}
+.main{padding:20px 28px 40px; min-width:0}
+.topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px}
+.topbar h1{font-family:var(--serif); font-size:24px; margin:0; font-weight:700}
+.roleswitch{display:flex; gap:4px; background:var(--surface-2); border-radius:8px; padding:3px}
+.rolebtn{border:none; background:transparent; padding:5px 10px; border-radius:6px; font-size:12px; color:var(--muted); cursor:pointer; font-family:var(--sans)}
+.rolebtn.on{background:var(--surface); color:var(--ink); box-shadow:0 0 0 1px var(--line)}
+.themebtn,.iconbtn{border:1px solid var(--line); background:var(--surface); padding:6px 10px; border-radius:8px; font-size:12px; color:var(--muted); cursor:pointer}
+.badge{font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--warm-ink); background:var(--warm-bg); padding:3px 8px; border-radius:6px; font-weight:600}
+.grid{display:grid; gap:14px}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g2{grid-template-columns:2fr 1fr}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px}
+.kpi .label{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em}
+.kpi .value{font-family:var(--mono); font-size:26px; font-weight:600; margin-top:6px}
+.kpi .delta{font-size:12px; margin-top:4px}
+.up{color:var(--good)} .down{color:var(--bad)}
+.sectitle{font-family:var(--serif); font-size:16px; font-weight:700; margin:0 0 12px}
+table{width:100%; border-collapse:collapse; font-size:13px}
+th{text-align:left; color:var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.04em; padding:8px 10px; border-bottom:1px solid var(--line)}
+td{padding:9px 10px; border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+.num{font-family:var(--mono); text-align:right; font-variant-numeric:tabular-nums}
+.pill{font-size:11px; padding:3px 8px; border-radius:20px; font-weight:600; display:inline-block}
+.pill.good{background:var(--good-bg); color:var(--good-ink)}
+.pill.warn{background:var(--warn-bg); color:var(--warn-ink)}
+.pill.bad{background:var(--bad-bg); color:var(--bad-ink)}
+.pill.neutral{background:var(--surface-2); color:var(--muted)}
+.btn{font-family:var(--sans); font-size:13px; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600}
+.btn.danger{color:var(--bad); border-color:var(--bad-bg)}
+.toolbar{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; align-items:center}
+.input{border:1px solid var(--line); background:var(--surface); border-radius:8px; padding:8px 10px; font-size:13px; color:var(--ink); font-family:var(--sans)}
+.thumb{width:34px; height:34px; border-radius:6px; background:var(--surface-2); display:inline-flex; align-items:center; justify-content:center; font-size:14px; color:var(--muted); vertical-align:middle; margin-right:8px}
+.screen{display:none}
+.screen.active{display:block}
+.authwrap{min-height:520px; display:flex; align-items:center; justify-content:center; background:var(--surface-2); border-radius:12px}
+.authcard{width:360px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:28px}
+.authcard h2{font-family:var(--serif); text-align:center; margin:0 0 4px}
+.authcard p.sub{text-align:center; color:var(--muted); font-size:13px; margin:0 0 20px}
+.field{margin-bottom:12px}
+.field label{font-size:12px; color:var(--muted); display:block; margin-bottom:4px}
+.field input,.field select{width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink); font-size:14px; font-family:var(--sans)}
+.field-row{display:flex; gap:10px}
+.field-row .field{flex:1}
+.divider{display:flex; align-items:center; gap:10px; color:var(--muted); font-size:11px; margin:16px 0; text-transform:uppercase; letter-spacing:.05em}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+.googlebtn{width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:9px; border:1px solid var(--line); border-radius:8px; background:var(--surface); font-size:13px; font-weight:600; cursor:pointer; color:var(--ink)}
+.gicon{width:16px;height:16px;border-radius:3px;background:conic-gradient(from 0deg,#EA4335 0 90deg,#FBBC05 90deg 180deg,#34A853 180deg 270deg,#4285F4 270deg 360deg)}
+.togglebtn{background:none;border:none;font-size:12px;color:var(--accent);cursor:pointer;text-align:center;width:100%;margin-top:14px}
+.bars{display:flex; align-items:flex-end; gap:8px; height:120px; padding-top:10px}
+.bar{flex:1; background:var(--accent); border-radius:4px 4px 0 0; position:relative}
+.bar span{position:absolute; bottom:-18px; left:0; right:0; text-align:center; font-size:10px; color:var(--muted)}
+.pie{width:96px;height:96px;border-radius:50%}
+.legend{display:flex; flex-direction:column; gap:6px; font-size:12px}
+.legend .sw{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:6px}
+.settingswrap{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+.rowline{display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--line); font-size:13px}
+.rowline:last-child{border-bottom:none}
+.switch{width:34px;height:19px;border-radius:20px;background:var(--line);position:relative; flex-shrink:0}
+.switch.on{background:var(--accent)}
+.switch i{position:absolute; top:2px; left:2px; width:15px; height:15px; border-radius:50%; background:#fff}
+.switch.on i{left:17px}
+.tabs2{display:flex; gap:4px; background:var(--surface-2); border-radius:8px; padding:3px; width:fit-content; margin-bottom:14px}
+.tab2{border:none;background:transparent;padding:6px 12px;border-radius:6px;font-size:12px;color:var(--muted);cursor:pointer}
+.tab2.on{background:var(--surface); color:var(--ink); box-shadow:0 0 0 1px var(--line)}
+.subscreen{display:none}
+.subscreen.active{display:block}
+.foot-note{font-size:11px; color:var(--muted); margin-top:10px; display:flex; align-items:center; gap:5px}
+.foot-note i{width:5px;height:5px;border-radius:50%;background:var(--accent); display:inline-block}
+.profile{position:relative}
+.profilebtn{display:flex; align-items:center; gap:8px; border:1px solid var(--line); background:var(--surface); padding:5px 10px 5px 5px; border-radius:20px; cursor:pointer; font-size:12px; color:var(--ink)}
+.avatar{width:24px;height:24px;border-radius:50%;background:var(--accent-bg); color:var(--accent-ink); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700}
+.dropdown{position:absolute; right:0; top:36px; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:6px; width:180px; box-shadow:0 6px 20px rgba(0,0,0,.12); display:none; z-index:5}
+.dropdown.open{display:block}
+.dropdown button{display:flex; width:100%; align-items:center; gap:8px; padding:8px 10px; border:none; background:transparent; border-radius:7px; font-size:13px; color:var(--ink); cursor:pointer; text-align:left; font-family:var(--sans)}
+.dropdown button:hover{background:var(--surface-2)}
+.dropdown hr{border:none; border-top:1px solid var(--line); margin:4px 2px}
+.perm{display:grid; grid-template-columns:repeat(2,1fr); gap:4px 14px; font-size:12px; margin-top:8px}
+.perm label{display:flex; align-items:center; gap:6px; color:var(--muted)}
+.clickable{cursor:pointer; transition:border-color .12s, transform .12s}
+.clickable:hover{border-color:var(--accent); transform:translateY(-1px)}
+.kpi.clickable .label{display:flex; align-items:center; justify-content:space-between}
+.kpi.clickable .label::after{content:"View source ›"; font-size:10px; color:var(--accent); text-transform:none; letter-spacing:0}
+tr.clickrow{cursor:pointer}
+tr.clickrow:hover td{background:var(--surface-2)}
+.bars.clickable .bar{cursor:pointer}
+.bars.clickable .bar:hover{opacity:.8}
+.legend.clickable div{cursor:pointer; padding:2px 4px; border-radius:5px}
+.legend.clickable div:hover{background:var(--surface-2)}
+th.sortable{cursor:pointer; user-select:none}
+th.sortable:hover{color:var(--ink)}
+th.sortable .arrow{font-size:9px; margin-left:3px; opacity:.5}
+th.sortable.sorted .arrow{opacity:1; color:var(--accent)}
+.overlay{position:absolute; inset:0; background:rgba(10,15,12,.45); display:none; align-items:flex-start; justify-content:center; padding:40px 20px; z-index:20; overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:var(--surface); border:1px solid var(--line); border-radius:12px; width:520px; max-width:100%; padding:22px 24px; box-shadow:0 12px 32px rgba(0,0,0,.18)}
+.modal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px}
+.modal-head h3{font-family:var(--serif); margin:0; font-size:18px}
+.modal-close{border:none; background:var(--surface-2); width:26px; height:26px; border-radius:50%; cursor:pointer; color:var(--muted); font-size:14px}
+.imgrow{display:flex; gap:8px; margin:6px 0 14px}
+.imgslot{flex:1; aspect-ratio:1; border:1.5px dashed var(--line); border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:11px; text-align:center}
+.linerow{display:grid; grid-template-columns:2fr 1fr 1fr 1fr auto; gap:8px; align-items:center; margin-bottom:8px}
+.linerow input,.linerow select{padding:7px 8px; font-size:12px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink)}
+.attach-tabs{display:flex; gap:4px; margin-bottom:10px}
+.modal-foot{display:flex; justify-content:flex-end; gap:8px; margin-top:16px; padding-top:14px; border-top:1px solid var(--line)}
+.receipt-line{display:flex; justify-content:space-between; font-size:13px; padding:5px 0; border-bottom:1px dashed var(--line)}
+.reptabs{display:flex; gap:4px; background:var(--surface-2); border-radius:8px; padding:3px; width:fit-content; margin-bottom:14px}
+</style>
+<div class="app" id="app">
+<div class="shell loggedout" id="shell">
+  <div class="rail">
+    <div class="brand">Dukandar<span>Shop &amp; inventory</span></div>
+    <button class="navbtn active" data-s="dash"><span class="dot"></span>Dashboard</button>
+    <button class="navbtn" data-s="inv"><span class="dot"></span>Inventory</button>
+    <button class="navbtn" data-s="purch"><span class="dot"></span>Purchases</button>
+    <button class="navbtn" data-s="expense"><span class="dot"></span>Expense</button>
+    <button class="navbtn" data-s="reports"><span class="dot"></span>Reports</button>
+    <button class="navbtn" data-s="master"><span class="dot"></span>Master</button>
+    <button class="navbtn" data-s="settings"><span class="dot"></span>Settings</button>
+    <div class="railfoot">Cloud-first · Firebase<br>talhaaffansiddique@gmail.com</div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <h1 id="title">Sign in</h1>
+      <div style="display:flex; gap:10px; align-items:center" id="topRight">
+        <span class="badge">Mockup — click to browse</span>
+        <div class="roleswitch">
+          <button class="rolebtn on">Owner</button>
+          <button class="rolebtn">Employee</button>
+        </div>
+        <button class="iconbtn" id="hamburgerBtn" title="More" style="display:none">&#9776;</button>
+        <div class="dropdown" id="hamburgerMenu">
+          <button id="signOutBtn">&#8618; Sign out</button>
+        </div>
+        <button class="themebtn" id="themeToggle">Toggle theme</button>
+      </div>
+    </div>
+
+    <div class="screen active" id="s-auth">
+      <div class="authwrap">
+        <div class="authcard">
+          <h2>Welcome back</h2>
+          <p class="sub">Sign in to your Dukandar account</p>
+          <div class="field"><label>Email</label><input value="owner@rafiqtraders.pk" readonly></div>
+          <div class="field"><label>Password</label><input type="password" value="••••••••" readonly></div>
+          <button class="btn primary" id="signInBtn" style="width:100%; padding:10px">Sign in</button>
+          <div class="divider">or</div>
+          <button class="googlebtn" id="googleSignInBtn"><span class="gicon"></span> Continue with Google</button>
+          <button class="togglebtn">Don't have an account? Create one</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="s-dash">
+      <p style="font-size:12px; color:var(--muted); margin:-6px 0 14px">Every number below is clickable — it opens the report or screen it was calculated from.</p>
+      <div class="grid g4" style="margin-bottom:16px">
+        <div class="card kpi clickable" data-goto="reports" data-repsub="financial"><div class="label">Today's sales</div><div class="value">Rs 48,250</div><div class="delta up">▲ 12% vs yesterday</div></div>
+        <div class="card kpi clickable" data-goto="reports" data-repsub="financial"><div class="label">Today's profit</div><div class="value">Rs 11,940</div><div class="delta up">▲ 8%</div></div>
+        <div class="card kpi clickable" data-goto="inv"><div class="label">Low stock items</div><div class="value">6</div><div class="delta down">▼ needs reorder</div></div>
+        <div class="card kpi clickable" data-goto="master" data-mastersub="suppliers"><div class="label">Pending dues</div><div class="value">Rs 22,800</div><div class="delta">4 suppliers</div></div>
+      </div>
+      <div class="grid g2">
+        <div class="card clickable" data-goto="reports" data-repsub="financial">
+          <p class="sectitle">Weekly sales</p>
+          <div class="bars">
+            <div class="bar" style="height:40%"><span>Mon</span></div>
+            <div class="bar" style="height:55%"><span>Tue</span></div>
+            <div class="bar" style="height:35%"><span>Wed</span></div>
+            <div class="bar" style="height:70%"><span>Thu</span></div>
+            <div class="bar" style="height:60%"><span>Fri</span></div>
+            <div class="bar" style="height:95%"><span>Sat</span></div>
+            <div class="bar" style="height:50%"><span>Sun</span></div>
+          </div>
+          <p style="font-size:11px; color:var(--muted); margin:22px 0 0">From the sales register — click to open Reports → Financial.</p>
+        </div>
+        <div class="card">
+          <p class="sectitle">Category split</p>
+          <div style="display:flex; gap:16px; align-items:center">
+            <div class="pie" style="background:conic-gradient(var(--accent) 0 45%, var(--warm) 45% 72%, var(--line) 72% 100%)"></div>
+            <div class="legend clickable">
+              <div data-goto="inv" data-invfilter="Sanitary ware"><span class="sw" style="background:var(--accent)"></span>Sanitary ware — 45%</div>
+              <div data-goto="inv" data-invfilter="Fittings"><span class="sw" style="background:var(--warm)"></span>Fittings — 27%</div>
+              <div data-goto="inv" data-invfilter="Other"><span class="sw" style="background:var(--line)"></span>Other — 28%</div>
+            </div>
+          </div>
+          <p style="font-size:11px; color:var(--muted); margin:12px 0 0">From product categories in Inventory — click a slice to filter there.</p>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <p class="sectitle">Recent transactions</p>
+        <table>
+          <tr><th>Time</th><th>Customer</th><th>Items</th><th class="num">Amount</th><th>Status</th></tr>
+          <tr class="clickrow" data-receipt="RCP-3391"><td>11:42 AM</td><td>Walk-in</td><td>3</td><td class="num">Rs 3,450</td><td><span class="pill good">Paid</span></td></tr>
+          <tr class="clickrow" data-receipt="RCP-3390"><td>11:20 AM</td><td>Ali Hardware</td><td>12</td><td class="num">Rs 18,900</td><td><span class="pill good">Paid</span></td></tr>
+          <tr class="clickrow" data-receipt="RCP-3389"><td>10:55 AM</td><td>Walk-in</td><td>1</td><td class="num">Rs 650</td><td><span class="pill warn">Refunded</span></td></tr>
+        </table>
+        <div class="foot-note"><i></i>Click a row to open the original receipt. Every row stores a full created-at timestamp internally, even where the screen only shows the time.</div>
+      </div>
+    </div>
+
+    <div class="screen" id="s-inv">
+      <div class="toolbar">
+        <input class="input" placeholder="Search products or SKU" style="flex:1">
+        <select class="input" id="invCategoryFilter"><option>All categories</option><option>Sanitary ware</option><option>Fittings</option><option>Other</option></select>
+        <button class="btn primary" id="openAddProduct">+ Add product</button>
+      </div>
+      <div class="card">
+        <table>
+          <tr><th>Product</th><th>SKU</th><th class="num">Stock</th><th class="num">Cost (avg)</th><th class="num">Price</th><th>Warranty</th><th>Status</th></tr>
+          <tr><td><span class="thumb">▦</span>Commode — Ivory 1pc</td><td>SAN-1042</td><td class="num">14</td><td class="num">4,200</td><td class="num">6,500</td><td>12 mo</td><td><span class="pill good">In stock</span></td></tr>
+          <tr><td><span class="thumb">▦</span>Basin Mixer Tap</td><td>FIT-2210</td><td class="num">3</td><td class="num">1,850</td><td class="num">2,950</td><td>6 mo</td><td><span class="pill warn">Low stock</span></td></tr>
+          <tr><td><span class="thumb">▦</span>PVC Pipe 4" (20ft)</td><td>PLM-0087</td><td class="num">0</td><td class="num">980</td><td class="num">1,450</td><td>—</td><td><span class="pill bad">Out of stock</span></td></tr>
+          <tr><td><span class="thumb">▦</span>Shower Head — Rain</td><td>SAN-1180</td><td class="num">22</td><td class="num">1,100</td><td class="num">1,800</td><td>3 mo</td><td><span class="pill good">In stock</span></td></tr>
+        </table>
+        <div class="foot-note"><i></i>Add/edit/delete on every product is logged with who and when for later audit export.</div>
+      </div>
+    </div>
+
+    <div class="screen" id="s-purch">
+      <div class="toolbar">
+        <button class="btn primary" id="openRecordPurchase">+ Record purchase</button>
+        <select class="input"><option>All suppliers</option><option>Rafiq Sanitary Supplies</option><option>Al-Karam Traders</option></select>
+      </div>
+      <div class="card">
+        <table>
+          <tr><th>Date</th><th>Supplier</th><th>Invoice</th><th class="num">Items</th><th class="num">Total</th><th>Attachment</th><th>Status</th></tr>
+          <tr><td>Jul 18</td><td>Rafiq Sanitary Supplies</td><td>INV-7741</td><td class="num">40</td><td class="num">Rs 168,000</td><td>📎 photo.jpg</td><td><span class="pill good">Paid</span></td></tr>
+          <tr><td>Jul 15</td><td>Al-Karam Traders</td><td>INV-0231</td><td class="num">15</td><td class="num">Rs 44,250</td><td>📎 scan.pdf</td><td><span class="pill warn">Partial</span></td></tr>
+          <tr><td>Jul 09</td><td>Rafiq Sanitary Supplies</td><td>INV-7688</td><td class="num">60</td><td class="num">Rs 231,000</td><td>—</td><td><span class="pill bad">Unpaid</span></td></tr>
+        </table>
+        <div class="foot-note"><i></i>Suppliers here are pulled live from Master → Suppliers.</div>
+      </div>
+    </div>
+
+    <div class="screen" id="s-reports">
+      <div class="reptabs">
+        <button class="tab2 tab2rsub on" data-repsub="financial">Financial</button>
+        <button class="tab2 tab2rsub" data-repsub="inventory">Inventory</button>
+        <button class="tab2 tab2rsub" data-repsub="purchase">Purchase</button>
+      </div>
+
+      <div class="subscreen active" id="r-financial">
+        <div class="toolbar">
+          <input class="input" type="date" value="2026-07-14">
+          <span style="color:var(--muted); font-size:13px">to</span>
+          <input class="input" type="date" value="2026-07-20">
+          <select class="input"><option>All payment types</option><option>Cash</option><option>Credit</option></select>
+          <button class="btn">Apply filters</button>
+          <button class="btn" style="margin-left:auto">Export PDF</button>
+        </div>
+        <div class="grid g4" style="margin-bottom:14px">
+          <div class="card kpi"><div class="label">Gross sales</div><div class="value">Rs 312,400</div></div>
+          <div class="card kpi"><div class="label">Expenses</div><div class="value">Rs 26,500</div></div>
+          <div class="card kpi"><div class="label">Refunds</div><div class="value">Rs 4,600</div></div>
+          <div class="card kpi"><div class="label">Net profit (P&amp;L)</div><div class="value">Rs 51,650</div></div>
+        </div>
+        <div class="card">
+          <table class="sortable-table">
+            <tr>
+              <th class="sortable" data-type="text">Receipt #<span class="arrow">▲▼</span></th>
+              <th class="sortable" data-type="text">Date<span class="arrow">▲▼</span></th>
+              <th class="sortable" data-type="text">Customer<span class="arrow">▲▼</span></th>
+              <th class="sortable num" data-type="num">Amount<span class="arrow">▲▼</span></th>
+              <th class="sortable" data-type="text">Payment<span class="arrow">▲▼</span></th>
+              <th></th>
+            </tr>
+            <tr><td>RCP-3391</td><td>Jul 20</td><td>Walk-in</td><td class="num">Rs 3,450</td><td>Cash</td><td><button class="btn" style="padding:4px 10px; font-size:12px">Refund</button></td></tr>
+            <tr><td>RCP-3390</td><td>Jul 20</td><td>Ali Hardware</td><td class="num">Rs 18,900</td><td>Credit</td><td><button class="btn" style="padding:4px 10px; font-size:12px">Refund</button></td></tr>
+            <tr><td>RCP-3389</td><td>Jul 19</td><td>Walk-in</td><td class="num">Rs 650</td><td>Cash</td><td><button class="btn" style="padding:4px 10px; font-size:12px">Refund</button></td></tr>
+          </table>
+          <div class="foot-note"><i></i>Net profit deducts recorded expenses from gross margin. Click any column header to sort.</div>
+        </div>
+      </div>
+
+      <div class="subscreen" id="r-inventory">
+        <div class="toolbar">
+          <select class="input"><option>All categories</option><option>Sanitary ware</option><option>Fittings</option></select>
+          <select class="input"><option>All stock status</option><option>In stock</option><option>Low stock</option><option>Out of stock</option></select>
+          <button class="btn" style="margin-left:auto">Export PDF</button>
+        </div>
+        <div class="card">
+          <table class="sortable-table">
+            <tr>
+              <th class="sortable" data-type="text">Product<span class="arrow">▲▼</span></th>
+              <th class="sortable" data-type="text">SKU<span class="arrow">▲▼</span></th>
+              <th class="sortable num" data-type="num">Stock<span class="arrow">▲▼</span></th>
+              <th class="sortable num" data-type="num">Cost (avg)<span class="arrow">▲▼</span></th>
+              <th class="sortable num" data-type="num">Price<span class="arrow">▲▼</span></th>
+              <th class="sortable num" data-type="num">Value on hand<span class="arrow">▲▼</span></th>
+              <th>Status</th>
+            </tr>
+            <tr><td>Commode — Ivory 1pc</td><td>SAN-1042</td><td class="num">14</td><td class="num">4,200</td><td class="num">6,500</td><td class="num">58,800</td><td><span class="pill good">In stock</span></td></tr>
+            <tr><td>Basin Mixer Tap</td><td>FIT-2210</td><td class="num">3</td><td class="num">1,850</td><td class="num">2,950</td><td class="num">5,550</td><td><span class="pill warn">Low stock</span></td></tr>
+            <tr><td>PVC Pipe 4" (20ft)</td><td>PLM-0087</td><td class="num">0</td><td class="num">980</td><td class="num">1,450</td><td class="num">0</td><td><span class="pill bad">Out of stock</span></td></tr>
+            <tr><td>Shower Head — Rain</td><td>SAN-1180</td><td class="num">22</td><td class="num">1,100</td><td class="num">1,800</td><td class="num">24,200</td><td><span class="pill good">In stock</span></td></tr>
+          </table>
+          <div class="foot-note"><i></i>Stock valuation report — value on hand uses weighted-average cost. Click a header to sort.</div>
+        </div>
+      </div>
+
+      <div class="subscreen" id="r-purchase">
+        <div class="toolbar">
+          <input class="input" type="date" value="2026-07-01">
+          <span style="color:var(--muted); font-size:13px">to</span>
+          <input class="input" type="date" value="2026-07-20">
+          <select class="input"><option>All suppliers</option><option>Rafiq Sanitary Supplies</option><option>Al-Karam Traders</option></select>
+          <button class="btn" style="margin-left:auto">Export PDF</button>
+        </div>
+        <div class="card">
+          <table class="sortable-table">
+            <tr>
+              <th class="sortable" data-type="text">Date<span class="arrow">▲▼</span></th>
+              <th class="sortable" data-type="text">Supplier<span class="arrow">▲▼</span></th>
+              <th class="sortable" data-type="text">Invoice<span class="arrow">▲▼</span></th>
+              <th class="sortable num" data-type="num">Items<span class="arrow">▲▼</span></th>
+              <th class="sortable num" data-type="num">Total<span class="arrow">▲▼</span></th>
+              <th>Status</th>
+            </tr>
+            <tr><td>Jul 18</td><td>Rafiq Sanitary Supplies</td><td>INV-7741</td><td class="num">40</td><td class="num">168,000</td><td><span class="pill good">Paid</span></td></tr>
+            <tr><td>Jul 15</td><td>Al-Karam Traders</td><td>INV-0231</td><td class="num">15</td><td class="num">44,250</td><td><span class="pill warn">Partial</span></td></tr>
+            <tr><td>Jul 09</td><td>Rafiq Sanitary Supplies</td><td>INV-7688</td><td class="num">60</td><td class="num">231,000</td><td><span class="pill bad">Unpaid</span></td></tr>
+          </table>
+          <div class="foot-note"><i></i>Mirrors Master → Suppliers outstanding balances. Click a header to sort.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="s-expense">
+      <div class="grid g2">
+        <div class="card">
+          <p class="sectitle">Add expense</p>
+          <div class="field"><label>Date</label><input type="date" value="2026-07-21"></div>
+          <div class="field"><label>Category</label>
+            <select><option>Rent</option><option>Utilities</option><option>Salaries</option><option>Transport</option><option>Miscellaneous</option></select>
+          </div>
+          <div class="field"><label>Amount (Rs)</label><input type="number" value="2500"></div>
+          <div class="field"><label>Note</label><input value="Electricity bill — July"></div>
+          <button class="btn primary" style="width:100%">Save expense</button>
+        </div>
+        <div class="card">
+          <p class="sectitle">This month</p>
+          <div class="kpi"><div class="label">Total expenses</div><div class="value">Rs 26,500</div></div>
+          <div class="legend" style="margin-top:14px">
+            <div><span class="sw" style="background:var(--accent)"></span>Rent — Rs 15,000</div>
+            <div><span class="sw" style="background:var(--warm)"></span>Utilities — Rs 6,500</div>
+            <div><span class="sw" style="background:var(--line)"></span>Transport — Rs 5,000</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <p class="sectitle">Expense log</p>
+        <table>
+          <tr><th>Date</th><th>Category</th><th>Note</th><th class="num">Amount</th><th>Added by</th></tr>
+          <tr><td>Jul 20</td><td>Utilities</td><td>Electricity bill — July</td><td class="num">Rs 6,500</td><td>Waseem Akhtar</td></tr>
+          <tr><td>Jul 05</td><td>Rent</td><td>Shop rent — July</td><td class="num">Rs 15,000</td><td>Waseem Akhtar</td></tr>
+          <tr><td>Jul 02</td><td>Transport</td><td>Delivery fuel</td><td class="num">Rs 5,000</td><td>Sana Malik</td></tr>
+        </table>
+        <div class="foot-note"><i></i>Feeds directly into the P&amp;L figure on the Reports screen.</div>
+      </div>
+    </div>
+
+    <div class="screen" id="s-master">
+      <div class="tabs2">
+        <button class="tab2 tab2msub on" data-sub="users">Users</button>
+        <button class="tab2 tab2msub" data-sub="suppliers">Suppliers</button>
+        <button class="tab2 tab2msub" data-sub="roles">Roles &amp; permissions</button>
+      </div>
+
+      <div class="subscreen active" id="m-users">
+        <div class="toolbar"><button class="btn primary">+ Add user</button></div>
+        <div class="card">
+          <table>
+            <tr><th>Name</th><th>Email</th><th>Access</th><th>Profile</th><th>Status</th><th>Added</th></tr>
+            <tr><td>Waseem Akhtar</td><td>owner@rafiqtraders.pk</td><td><span class="pill good">Admin</span></td><td>Full rights</td><td><span class="pill good">Active</span></td><td>Jan 3, 2026</td></tr>
+            <tr><td>Sana Malik</td><td>sana@rafiqtraders.pk</td><td><span class="pill neutral">Employee</span></td><td>Cashier</td><td><span class="pill good">Active</span></td><td>Mar 11, 2026</td></tr>
+            <tr><td>Imran Ali</td><td>imran@rafiqtraders.pk</td><td><span class="pill neutral">Employee</span></td><td>Stock manager</td><td><span class="pill warn">On leave</span></td><td>Apr 22, 2026</td></tr>
+          </table>
+          <div class="foot-note"><i></i>Admin always has complete rights; every other user must carry a profile from Roles &amp; permissions.</div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <p class="sectitle">New user</p>
+          <div class="field-row">
+            <div class="field"><label>Full name</label><input value="Bilal Sheikh"></div>
+            <div class="field"><label>Email</label><input value="bilal@rafiqtraders.pk"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Access level</label>
+              <select><option>Employee</option><option>Admin</option></select>
+            </div>
+            <div class="field"><label>Profile (employee only)</label>
+              <select><option>Cashier</option><option>Stock manager</option><option>Accountant</option></select>
+            </div>
+          </div>
+          <button class="btn primary">Create user</button>
+        </div>
+      </div>
+
+      <div class="subscreen" id="m-suppliers">
+        <div class="toolbar"><button class="btn primary">+ Add supplier</button></div>
+        <div class="card">
+          <table>
+            <tr><th>Supplier</th><th>Contact</th><th>Address</th><th class="num">Outstanding</th><th>Added</th></tr>
+            <tr><td>Rafiq Sanitary Supplies</td><td>0300-5551234</td><td>Site Area, Karachi</td><td class="num">Rs 18,300</td><td>Feb 14, 2026</td></tr>
+            <tr><td>Al-Karam Traders</td><td>0321-7789001</td><td>Bolton Market, Karachi</td><td class="num">Rs 4,500</td><td>May 2, 2026</td></tr>
+          </table>
+          <div class="foot-note"><i></i>Suppliers added here appear immediately in the Purchases screen.</div>
+        </div>
+      </div>
+
+      <div class="subscreen" id="m-roles">
+        <div class="toolbar"><button class="btn primary">+ New role</button></div>
+        <div class="card" style="margin-bottom:12px">
+          <div style="display:flex; justify-content:space-between; align-items:center">
+            <strong>Admin</strong><span class="pill good">Fixed — full access</span>
+          </div>
+          <p style="color:var(--muted); font-size:12px; margin:6px 0 0">Cannot be edited. Every module, every action, always.</p>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div style="display:flex; justify-content:space-between; align-items:center">
+            <strong>Cashier</strong><button class="btn" style="padding:4px 10px; font-size:12px">Edit</button>
+          </div>
+          <div class="perm">
+            <label><input type="checkbox" checked disabled>View dashboard</label>
+            <label><input type="checkbox" checked disabled>Record sales</label>
+            <label><input type="checkbox" disabled>Manage inventory</label>
+            <label><input type="checkbox" disabled>Record purchases</label>
+            <label><input type="checkbox" disabled>View reports</label>
+            <label><input type="checkbox" disabled>Add expenses</label>
+          </div>
+        </div>
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center">
+            <strong>Stock manager</strong><button class="btn" style="padding:4px 10px; font-size:12px">Edit</button>
+          </div>
+          <div class="perm">
+            <label><input type="checkbox" checked disabled>View dashboard</label>
+            <label><input type="checkbox" disabled>Record sales</label>
+            <label><input type="checkbox" checked disabled>Manage inventory</label>
+            <label><input type="checkbox" checked disabled>Record purchases</label>
+            <label><input type="checkbox" disabled>View reports</label>
+            <label><input type="checkbox" disabled>Add expenses</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="s-settings">
+      <div class="settingswrap">
+        <div class="card">
+          <p class="sectitle">Company master</p>
+          <div class="field"><label>Business name</label><input value="Rafiq Sanitary Traders"></div>
+          <div class="field"><label>Address</label><input value="Shop 14, Sadar Market, Karachi"></div>
+          <div class="field"><label>Logo</label><input type="text" value="logo.png (uploaded)" readonly></div>
+        </div>
+        <div class="card">
+          <p class="sectitle">App settings</p>
+          <div class="rowline">Google Sign-In<div class="switch on"><i></i></div></div>
+          <div class="rowline">Dark mode default<div class="switch"><i></i></div></div>
+          <div class="rowline">Show subcategories<div class="switch on"><i></i></div></div>
+          <div class="rowline">Print receipt after sale<div class="switch on"><i></i></div></div>
+          <div class="field" style="margin-top:12px"><label>Google OAuth Client ID</label><input value="•••••••••••.apps.googleusercontent.com"></div>
+          <button class="btn" style="margin-top:8px">Seed sample data</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modalAddProduct" style="display:none">
+    <div class="modal-head"><h3>Add product</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="field-row">
+      <div class="field"><label>Product name</label><input value="Angle Valve — Brass"></div>
+      <div class="field"><label>SKU</label><input value="FIT-2311"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Category</label><select><option>Sanitary ware</option><option>Fittings</option><option>Other</option></select></div>
+      <div class="field"><label>Warranty (months, max 12)</label><input type="number" max="12" value="6"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Cost price</label><input type="number" value="450"></div>
+      <div class="field"><label>Selling price</label><input type="number" value="750"></div>
+      <div class="field"><label>Opening stock</label><input type="number" value="20"></div>
+    </div>
+    <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px">Product images (up to 3)</label>
+    <div class="imgrow">
+      <div class="imgslot">+ Photo 1</div>
+      <div class="imgslot">+ Photo 2</div>
+      <div class="imgslot">+ Photo 3</div>
+    </div>
+    <div class="modal-foot"><button class="btn" data-close>Cancel</button><button class="btn primary" data-close>Save product</button></div>
+  </div>
+
+  <div class="modal" id="modalRecordPurchase" style="display:none">
+    <div class="modal-head"><h3>Record purchase</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="field-row">
+      <div class="field"><label>Supplier</label><select><option>Rafiq Sanitary Supplies</option><option>Al-Karam Traders</option></select></div>
+      <div class="field"><label>Invoice #</label><input value="INV-7802"></div>
+      <div class="field"><label>Date</label><input type="date" value="2026-07-21"></div>
+    </div>
+    <label style="font-size:12px; color:var(--muted); display:block; margin:4px 0 6px">Line items</label>
+    <div class="linerow" style="font-size:11px; color:var(--muted)"><span>Product</span><span>Qty</span><span>Unit cost</span><span>Subtotal</span><span></span></div>
+    <div class="linerow"><input value="Commode — Ivory 1pc"><input type="number" value="10"><input type="number" value="4200"><input value="42,000" readonly><button class="btn" style="padding:4px 8px; font-size:12px">×</button></div>
+    <div class="linerow"><input value="Basin Mixer Tap"><input type="number" value="6"><input type="number" value="1850"><input value="11,100" readonly><button class="btn" style="padding:4px 8px; font-size:12px">×</button></div>
+    <button class="btn" style="margin:4px 0 14px">+ Add line item</button>
+    <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:6px">Attach invoice</label>
+    <div class="attach-tabs">
+      <button class="tab2 on">Upload file</button>
+      <button class="tab2">Camera</button>
+      <button class="tab2">Cloud URL</button>
+    </div>
+    <input class="input" style="width:100%" placeholder="No file selected">
+    <div class="modal-foot"><span class="num" style="margin-right:auto; font-weight:600">Total: Rs 53,100</span><button class="btn" data-close>Cancel</button><button class="btn primary" data-close>Save purchase</button></div>
+  </div>
+
+  <div class="modal" id="modalReceipt" style="display:none">
+    <div class="modal-head"><h3 id="receiptTitle">Receipt RCP-3391</h3><button class="modal-close" data-close>&times;</button></div>
+    <p style="font-size:12px; color:var(--muted); margin:-8px 0 14px">Sold Jul 21, 2026 · 11:42:07 AM · Cashier: Sana Malik</p>
+    <div class="receipt-line"><span>Commode — Ivory 1pc × 1</span><span class="num">Rs 6,500</span></div>
+    <div class="receipt-line"><span>Shower Head — Rain × 1</span><span class="num">Rs 1,800</span></div>
+    <div class="receipt-line"><span>Angle Valve — Brass × 2</span><span class="num">Rs 1,500</span></div>
+    <div class="receipt-line" style="border-bottom:none; font-weight:700; padding-top:8px"><span>Total</span><span class="num">Rs 9,800</span></div>
+    <div class="foot-note" style="margin-top:12px"><i></i>This is the exact source record backing the dashboard total — full audit trail stored with each line.</div>
+    <div class="modal-foot"><button class="btn primary" data-close>Close</button></div>
+  </div>
+</div>
+</div>
+<script>
+const titles={dash:"Dashboard",inv:"Inventory",purch:"Purchases",reports:"Reports",master:"Master",settings:"Settings",expense:"Expense"};
+const shell=document.getElementById('shell');
+const hamburgerBtn=document.getElementById('hamburgerBtn');
+const hamburgerMenu=document.getElementById('hamburgerMenu');
+
+function showScreen(s){
+  document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));
+  const navBtn=document.querySelector('.navbtn[data-s="'+s+'"]');
+  if(navBtn) navBtn.classList.add('active');
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  document.getElementById('s-'+s).classList.add('active');
+  document.getElementById('title').textContent=titles[s]||s;
+}
+
+document.querySelectorAll('.navbtn').forEach(b=>{
+  b.addEventListener('click',()=>showScreen(b.dataset.s));
+});
+
+function logIn(){
+  shell.classList.remove('loggedout');
+  hamburgerBtn.style.display='inline-block';
+  showScreen('dash');
+}
+function logOut(){
+  shell.classList.add('loggedout');
+  hamburgerBtn.style.display='none';
+  hamburgerMenu.classList.remove('open');
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  document.getElementById('s-auth').classList.add('active');
+  document.getElementById('title').textContent='Sign in';
+}
+document.getElementById('signInBtn').addEventListener('click',logIn);
+document.getElementById('googleSignInBtn').addEventListener('click',logIn);
+document.getElementById('signOutBtn').addEventListener('click',logOut);
+
+hamburgerBtn.addEventListener('click',(e)=>{
+  e.stopPropagation();
+  hamburgerMenu.classList.toggle('open');
+});
+document.addEventListener('click',(e)=>{
+  if(!hamburgerMenu.contains(e.target) && e.target!==hamburgerBtn){
+    hamburgerMenu.classList.remove('open');
+  }
+});
+hamburgerMenu.querySelectorAll('button[data-s]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    hamburgerMenu.classList.remove('open');
+    showScreen(b.dataset.s);
+  });
+});
+
+document.querySelectorAll('.tab2msub').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.tab2msub').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    document.querySelectorAll('#s-master .subscreen').forEach(x=>x.classList.remove('active'));
+    document.getElementById('m-'+b.dataset.sub).classList.add('active');
+  });
+});
+
+function showReportSub(sub){
+  document.querySelectorAll('.tab2rsub').forEach(x=>x.classList.toggle('on', x.dataset.repsub===sub));
+  document.querySelectorAll('#s-reports .subscreen').forEach(x=>x.classList.remove('active'));
+  document.getElementById('r-'+sub).classList.add('active');
+}
+document.querySelectorAll('.tab2rsub').forEach(b=>{
+  b.addEventListener('click',()=>showReportSub(b.dataset.repsub));
+});
+
+const overlay=document.getElementById('overlay');
+function openModal(id){
+  document.querySelectorAll('.modal').forEach(m=>m.style.display='none');
+  document.getElementById(id).style.display='block';
+  overlay.classList.add('open');
+}
+function closeModal(){ overlay.classList.remove('open'); }
+overlay.addEventListener('click',(e)=>{ if(e.target===overlay) closeModal(); });
+overlay.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeModal));
+document.getElementById('openAddProduct').addEventListener('click',()=>openModal('modalAddProduct'));
+document.getElementById('openRecordPurchase').addEventListener('click',()=>openModal('modalRecordPurchase'));
+
+document.querySelectorAll('.clickrow[data-receipt]').forEach(row=>{
+  row.addEventListener('click',()=>{
+    document.getElementById('receiptTitle').textContent='Receipt '+row.dataset.receipt;
+    openModal('modalReceipt');
+  });
+});
+
+document.querySelectorAll('#s-dash [data-goto]').forEach(el=>{
+  el.addEventListener('click',()=>{
+    showScreen(el.dataset.goto);
+    if(el.dataset.repsub) showReportSub(el.dataset.repsub);
+    if(el.dataset.mastersub){
+      document.querySelectorAll('.tab2msub').forEach(x=>x.classList.toggle('on', x.dataset.sub===el.dataset.mastersub));
+      document.querySelectorAll('#s-master .subscreen').forEach(x=>x.classList.remove('active'));
+      document.getElementById('m-'+el.dataset.mastersub).classList.add('active');
+    }
+    if(el.dataset.invfilter){
+      document.getElementById('invCategoryFilter').value=el.dataset.invfilter==='Other' ? 'Other' : el.dataset.invfilter;
+    }
+  });
+});
+
+function sortTable(table, th){
+  const idx=Array.from(th.parentNode.children).indexOf(th);
+  const type=th.dataset.type;
+  const rows=Array.from(table.querySelectorAll('tr')).slice(1);
+  const asc = !(th.classList.contains('sorted') && th.dataset.dir==='asc');
+  th.parentNode.querySelectorAll('th').forEach(x=>{x.classList.remove('sorted'); delete x.dataset.dir;});
+  th.classList.add('sorted');
+  th.dataset.dir = asc ? 'asc' : 'desc';
+  rows.sort((a,b)=>{
+    let av=a.children[idx].textContent.trim();
+    let bv=b.children[idx].textContent.trim();
+    if(type==='num'){
+      av=parseFloat(av.replace(/[^0-9.\-]/g,''))||0;
+      bv=parseFloat(bv.replace(/[^0-9.\-]/g,''))||0;
+      return asc ? av-bv : bv-av;
+    }
+    return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+  });
+  rows.forEach(r=>table.appendChild(r));
+}
+document.querySelectorAll('.sortable-table th.sortable').forEach(th=>{
+  th.addEventListener('click',()=>sortTable(th.closest('table'), th));
+});
+
+document.getElementById('themeToggle').addEventListener('click',()=>{
+  const r=document.documentElement;
+  r.setAttribute('data-theme', r.getAttribute('data-theme')==='dark' ? 'light':'dark');
+});
+</script>

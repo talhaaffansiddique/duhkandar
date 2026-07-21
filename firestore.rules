@@ -1,0 +1,87 @@
+rules_version = '2';
+
+// Single-shop model: every signed-in user belongs to this one shop's data.
+// Admin always has full rights; Employees are gated by the permission set
+// on the Role document referenced by their user profile's roleId.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function myProfile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && myProfile().access == 'Admin';
+    }
+
+    function myRole() {
+      return get(/databases/$(database)/documents/roles/$(myProfile().roleId)).data;
+    }
+
+    function hasPermission(key) {
+      return isAdmin()
+        || (isSignedIn()
+            && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+            && myProfile().roleId != null
+            && exists(/databases/$(database)/documents/roles/$(myProfile().roleId))
+            && myRole().permissions[key] == true);
+    }
+
+    // users: self can read/create their own uid-keyed doc (bootstrap or invite
+    // claim); Admins manage everyone, including email-keyed pending invites.
+    match /users/{userId} {
+      // A signed-in user may read their own uid-keyed doc, or an
+      // email-keyed invite doc that matches their own email (so they can
+      // claim it on first login), besides Admins reading everyone.
+      allow read: if isSignedIn()
+        && (request.auth.uid == userId || userId == request.auth.token.email || isAdmin());
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
+      allow delete: if isAdmin()
+        || (isSignedIn() && resource.data.email == request.auth.token.email);
+    }
+
+    match /roles/{roleId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /suppliers/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /settings/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /products/{id} {
+      allow read: if isSignedIn();
+      allow write: if hasPermission('manageInventory');
+    }
+
+    match /purchases/{id} {
+      allow read: if isSignedIn();
+      allow write: if hasPermission('recordPurchases');
+    }
+
+    match /sales/{id} {
+      allow read: if isSignedIn();
+      allow create: if hasPermission('recordSales');
+      allow update: if hasPermission('recordSales') || hasPermission('viewReports');
+      allow delete: if isAdmin();
+    }
+
+    match /expenses/{id} {
+      allow read: if isSignedIn();
+      allow write: if hasPermission('addExpenses');
+    }
+  }
+}
