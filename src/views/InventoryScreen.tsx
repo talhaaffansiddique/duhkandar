@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useCollection, byCreatedDesc } from "../lib/firestore";
+import { useShopCollection, byCreatedDesc } from "../lib/firestore";
 import type { Product } from "../types";
 import AddProductModal from "../components/AddProductModal";
 
@@ -14,7 +14,7 @@ function stockStatus(p: Product): { label: string; cls: string } {
 }
 
 export default function InventoryScreen() {
-  const { data: products, loading } = useCollection<Product>("products", byCreatedDesc());
+  const { data: products, loading } = useShopCollection<Product>("products", byCreatedDesc());
   const [params, setParams] = useSearchParams();
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);

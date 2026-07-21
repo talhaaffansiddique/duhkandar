@@ -2,7 +2,7 @@ import { useState } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { uploadToCloudinary } from "../lib/cloudinary";
-import { useCollection, useAuditedWrites } from "../lib/firestore";
+import { useShopCollection, useShopAuditedWrites, useShopPath } from "../lib/firestore";
 import Modal from "./Modal";
 import type { Product, Supplier, PurchaseLineItem } from "../types";
 
@@ -13,9 +13,10 @@ interface DraftLine {
 }
 
 export default function RecordPurchaseModal({ onClose }: { onClose: () => void }) {
-  const { data: suppliers } = useCollection<Supplier>("suppliers");
-  const { data: products } = useCollection<Product>("products");
-  const { create: createPurchase } = useAuditedWrites("purchases");
+  const { data: suppliers } = useShopCollection<Supplier>("suppliers");
+  const { data: products } = useShopCollection<Product>("products");
+  const { create: createPurchase } = useShopAuditedWrites("purchases");
+  const productsPath = useShopPath("products");
 
   const [supplierId, setSupplierId] = useState(suppliers[0]?.id ?? "");
   const [invoiceNo, setInvoiceNo] = useState("");
@@ -67,12 +68,13 @@ export default function RecordPurchaseModal({ onClose }: { onClose: () => void }
       });
 
       // Weighted-average cost: fold each line into its product before writing the purchase record.
+      if (!productsPath) throw new Error("No shop selected yet.");
       for (const line of lines) {
         const product = products.find((p) => p.id === line.productId);
         if (!product) continue;
         const newStock = product.stock + line.qty;
         const newAvgCost = (product.stock * product.avgCost + line.qty * line.unitCost) / newStock;
-        await updateDoc(doc(db, "products", product.id), {
+        await updateDoc(doc(db, productsPath, product.id), {
           stock: newStock,
           avgCost: newAvgCost,
           // eslint-disable-next-line react-hooks/purity -- Date.now() here runs inside an event handler, not render.

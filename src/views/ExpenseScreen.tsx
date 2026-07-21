@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useCollection, useAuditedWrites, byCreatedDesc } from "../lib/firestore";
+import { useShopCollection, useShopAuditedWrites, byCreatedDesc } from "../lib/firestore";
 import { useAuth } from "../context/AuthContext";
 import type { Expense } from "../types";
 
@@ -18,8 +18,8 @@ function money(n: number) {
 
 export default function ExpenseScreen() {
   const { profile } = useAuth();
-  const { data: expenses, loading } = useCollection<Expense>("expenses", byCreatedDesc());
-  const { create } = useAuditedWrites("expenses");
+  const { data: expenses, loading } = useShopCollection<Expense>("expenses", byCreatedDesc());
+  const { create } = useShopAuditedWrites("expenses");
 
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [category, setCategory] = useState<Expense["category"]>("Rent");

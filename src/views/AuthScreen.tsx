@@ -5,6 +5,7 @@ export default function AuthScreen() {
   const { signIn, registerOwner, signInWithGoogle, error, clearError } = useAuth();
   const [mode, setMode] = useState<"signin" | "register">("signin");
   const [name, setName] = useState("");
+  const [shopName, setShopName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -16,7 +17,7 @@ export default function AuthScreen() {
       if (mode === "signin") {
         await signIn(email, password);
       } else {
-        await registerOwner(name, email, password);
+        await registerOwner(name, email, password, shopName);
       }
     } catch {
       // error is already surfaced via context
@@ -45,10 +46,21 @@ export default function AuthScreen() {
         </p>
         <form onSubmit={handleSubmit}>
           {mode === "register" && (
-            <div className="field">
-              <label>Your name</label>
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Waseem Akhtar" required />
-            </div>
+            <>
+              <div className="field">
+                <label>Your name</label>
+                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Waseem Akhtar" required />
+              </div>
+              <div className="field">
+                <label>Shop name</label>
+                <input
+                  value={shopName}
+                  onChange={(e) => setShopName(e.target.value)}
+                  placeholder="Rafiq Sanitary Traders"
+                  required
+                />
+              </div>
+            </>
           )}
           <div className="field">
             <label>Email</label>

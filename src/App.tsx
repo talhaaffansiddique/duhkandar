@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate, NavLink, useLocation } from "react-router-dom";
 import { isFirebaseConfigured } from "./firebase/config";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { usePermissions } from "./lib/permissions";
 import AuthScreen from "./views/AuthScreen";
+import ShopSetupScreen from "./views/ShopSetupScreen";
 import DashboardScreen from "./views/DashboardScreen";
 import InventoryScreen from "./views/InventoryScreen";
 import PurchaseScreen from "./views/PurchaseScreen";
@@ -28,10 +29,22 @@ function Shell() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark" | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const title = TITLES[location.pathname] || "Dukandar";
   const canSeePurchases = isAdmin || permissions.recordPurchases;
   const canSeeMaster = isAdmin;
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
 
   function toggleTheme() {
     const next = theme === "dark" ? "light" : "dark";
@@ -80,7 +93,7 @@ function Shell() {
       <div className="main">
         <div className="topbar">
           <h1>{title}</h1>
-          <div style={{ display: "flex", gap: 10, alignItems: "center", position: "relative" }}>
+          <div style={{ display: "flex", gap: 10, alignItems: "center", position: "relative" }} ref={menuRef}>
             <span className="pill neutral">{profile?.access === "Admin" ? "Admin" : profile?.access}</span>
             <button className="iconbtn" onClick={() => setMenuOpen((v) => !v)} aria-label="More">
               &#9776;
@@ -117,7 +130,7 @@ function Shell() {
 }
 
 function AppInner() {
-  const { firebaseUser, loading } = useAuth();
+  const { firebaseUser, loading, needsShopSetup } = useAuth();
 
   if (loading) {
     return (
@@ -134,6 +147,16 @@ function AppInner() {
       <div className="shell loggedout">
         <div className="main">
           <AuthScreen />
+        </div>
+      </div>
+    );
+  }
+
+  if (needsShopSetup) {
+    return (
+      <div className="shell loggedout">
+        <div className="main">
+          <ShopSetupScreen />
         </div>
       </div>
     );

@@ -1,8 +1,9 @@
 rules_version = '2';
 
-// Single-shop model: every signed-in user belongs to this one shop's data.
-// Admin always has full rights; Employees are gated by the permission set
-// on the Role document referenced by their user profile's roleId.
+// Multi-tenant model: every business record lives under shops/{shopId}/...
+// so different owners' data is physically separated, not just filtered.
+// users/{uid} stays top-level (queried before we know a shopId) and carries
+// a shopId field marking which shop it belongs to.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -14,74 +15,85 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
-    function isAdmin() {
-      return isSignedIn()
-        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && myProfile().access == 'Admin';
+    function hasProfile() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
 
-    function myRole() {
-      return get(/databases/$(database)/documents/roles/$(myProfile().roleId)).data;
+    // Signed-in, has a profile, and that profile belongs to this shop.
+    function inShop(shopId) {
+      return hasProfile() && myProfile().shopId == shopId;
     }
 
-    function hasPermission(key) {
-      return isAdmin()
-        || (isSignedIn()
-            && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+    function isAdminOfShop(shopId) {
+      return inShop(shopId) && myProfile().access == 'Admin';
+    }
+
+    function myRole(shopId) {
+      return get(/databases/$(database)/documents/shops/$(shopId)/roles/$(myProfile().roleId)).data;
+    }
+
+    function hasPermission(shopId, key) {
+      return isAdminOfShop(shopId)
+        || (inShop(shopId)
             && myProfile().roleId != null
-            && exists(/databases/$(database)/documents/roles/$(myProfile().roleId))
-            && myRole().permissions[key] == true);
+            && exists(/databases/$(database)/documents/shops/$(shopId)/roles/$(myProfile().roleId))
+            && myRole(shopId).permissions[key] == true);
     }
 
-    // users: self can read/create their own uid-keyed doc (bootstrap or invite
-    // claim); Admins manage everyone, including email-keyed pending invites.
+    // users: self can read/create their own uid-keyed doc (bootstrap or
+    // invite claim); Admins manage everyone within their own shop, including
+    // email-keyed pending invites they created.
     match /users/{userId} {
-      // A signed-in user may read their own uid-keyed doc, or an
-      // email-keyed invite doc that matches their own email (so they can
-      // claim it on first login), besides Admins reading everyone.
       allow read: if isSignedIn()
-        && (request.auth.uid == userId || userId == request.auth.token.email || isAdmin());
+        && (request.auth.uid == userId
+            || userId == request.auth.token.email
+            || (hasProfile() && myProfile().access == 'Admin' && resource.data.shopId == myProfile().shopId));
       allow create: if isSignedIn() && request.auth.uid == userId;
-      allow update: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
-      allow delete: if isAdmin()
+      allow update: if (isSignedIn() && request.auth.uid == userId)
+        || (hasProfile() && myProfile().access == 'Admin' && resource.data.shopId == myProfile().shopId);
+      allow delete: if (hasProfile() && myProfile().access == 'Admin' && resource.data.shopId == myProfile().shopId)
         || (isSignedIn() && resource.data.email == request.auth.token.email);
     }
 
-    match /roles/{roleId} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
-    }
+    // shops: created by whoever is about to own it (their profile doc
+    // doesn't exist yet at that instant); read/updated only by members.
+    match /shops/{shopId} {
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow read: if inShop(shopId);
+      allow update: if isAdminOfShop(shopId);
+      allow delete: if false;
 
-    match /suppliers/{id} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
-    }
+      match /products/{id} {
+        allow read: if inShop(shopId);
+        allow write: if hasPermission(shopId, 'manageInventory');
+      }
 
-    match /settings/{id} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
-    }
+      match /purchases/{id} {
+        allow read: if inShop(shopId);
+        allow write: if hasPermission(shopId, 'recordPurchases');
+      }
 
-    match /products/{id} {
-      allow read: if isSignedIn();
-      allow write: if hasPermission('manageInventory');
-    }
+      match /sales/{id} {
+        allow read: if inShop(shopId);
+        allow create: if hasPermission(shopId, 'recordSales');
+        allow update: if hasPermission(shopId, 'recordSales') || hasPermission(shopId, 'viewReports');
+        allow delete: if isAdminOfShop(shopId);
+      }
 
-    match /purchases/{id} {
-      allow read: if isSignedIn();
-      allow write: if hasPermission('recordPurchases');
-    }
+      match /expenses/{id} {
+        allow read: if inShop(shopId);
+        allow write: if hasPermission(shopId, 'addExpenses');
+      }
 
-    match /sales/{id} {
-      allow read: if isSignedIn();
-      allow create: if hasPermission('recordSales');
-      allow update: if hasPermission('recordSales') || hasPermission('viewReports');
-      allow delete: if isAdmin();
-    }
+      match /suppliers/{id} {
+        allow read: if inShop(shopId);
+        allow write: if isAdminOfShop(shopId);
+      }
 
-    match /expenses/{id} {
-      allow read: if isSignedIn();
-      allow write: if hasPermission('addExpenses');
+      match /roles/{id} {
+        allow read: if inShop(shopId);
+        allow write: if isAdminOfShop(shopId);
+      }
     }
   }
 }

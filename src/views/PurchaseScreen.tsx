@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCollection, byCreatedDesc } from "../lib/firestore";
+import { useShopCollection, byCreatedDesc } from "../lib/firestore";
 import type { Purchase, Supplier } from "../types";
 import RecordPurchaseModal from "../components/RecordPurchaseModal";
 
@@ -8,8 +8,8 @@ function money(n: number) {
 }
 
 export default function PurchaseScreen() {
-  const { data: purchases, loading } = useCollection<Purchase>("purchases", byCreatedDesc());
-  const { data: suppliers } = useCollection<Supplier>("suppliers");
+  const { data: purchases, loading } = useShopCollection<Purchase>("purchases", byCreatedDesc());
+  const { data: suppliers } = useShopCollection<Supplier>("suppliers");
   const [supplierFilter, setSupplierFilter] = useState("All suppliers");
   const [modalOpen, setModalOpen] = useState(false);
 

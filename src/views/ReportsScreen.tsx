@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
-import { useCollection, byCreatedDesc } from "../lib/firestore";
+import { useShopCollection, useShopPath, byCreatedDesc } from "../lib/firestore";
 import { useSortableRows } from "../hooks/useSortableRows";
 import type { Sale, Product, Purchase, Expense } from "../types";
 
@@ -52,8 +52,9 @@ function SortHeader({
 }
 
 function FinancialTab() {
-  const { data: sales } = useCollection<Sale>("sales", byCreatedDesc());
-  const { data: expenses } = useCollection<Expense>("expenses");
+  const { data: sales } = useShopCollection<Sale>("sales", byCreatedDesc());
+  const { data: expenses } = useShopCollection<Expense>("expenses");
+  const salesPath = useShopPath("sales");
   const [from, setFrom] = useState(() => new Date(Date.now() - 6 * 86400000).toISOString().slice(0, 10));
   const [to, setTo] = useState(() => new Date().toISOString().slice(0, 10));
   const [payment, setPayment] = useState("All payment types");
@@ -84,8 +85,9 @@ function FinancialTab() {
   const netProfit = gross - refunds - periodExpenses;
 
   async function refund(saleId: string) {
+    if (!salesPath) return;
     // eslint-disable-next-line react-hooks/purity -- Date.now() here runs inside an event handler, not render.
-    await updateDoc(doc(db, "sales", saleId), { status: "Refunded", updatedAt: Date.now() });
+    await updateDoc(doc(db, salesPath, saleId), { status: "Refunded", updatedAt: Date.now() });
   }
 
   return (
@@ -161,7 +163,7 @@ function FinancialTab() {
 }
 
 function InventoryTab() {
-  const { data: products } = useCollection<Product>("products");
+  const { data: products } = useShopCollection<Product>("products");
   const [category, setCategory] = useState("All categories");
   const [status, setStatus] = useState("All stock status");
   const categories = useMemo(() => ["All categories", ...new Set(products.map((p) => p.category))], [products]);
@@ -254,7 +256,7 @@ function InventoryTab() {
 }
 
 function PurchaseTab() {
-  const { data: purchases } = useCollection<Purchase>("purchases", byCreatedDesc());
+  const { data: purchases } = useShopCollection<Purchase>("purchases", byCreatedDesc());
   const [from, setFrom] = useState(() => new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10));
   const [to, setTo] = useState(() => new Date().toISOString().slice(0, 10));
   const [supplier, setSupplier] = useState("All suppliers");

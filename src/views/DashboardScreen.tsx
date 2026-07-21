@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCollection, byCreatedDesc } from "../lib/firestore";
+import { useShopCollection, byCreatedDesc } from "../lib/firestore";
 import type { Sale, Product, Purchase } from "../types";
 import ReceiptModal from "../components/ReceiptModal";
 
@@ -22,9 +22,9 @@ function startOfWeek() {
 
 export default function DashboardScreen() {
   const navigate = useNavigate();
-  const { data: sales } = useCollection<Sale>("sales", byCreatedDesc());
-  const { data: products } = useCollection<Product>("products");
-  const { data: purchases } = useCollection<Purchase>("purchases");
+  const { data: sales } = useShopCollection<Sale>("sales", byCreatedDesc());
+  const { data: products } = useShopCollection<Product>("products");
+  const { data: purchases } = useShopCollection<Purchase>("purchases");
   const [openReceipt, setOpenReceipt] = useState<Sale | null>(null);
 
   const todaySales = useMemo(() => sales.filter((s) => isToday(s.createdAt) && s.status !== "Refunded"), [sales]);

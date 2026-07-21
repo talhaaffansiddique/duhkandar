@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
-import { useCollection, useAuditedWrites, byCreatedDesc } from "../lib/firestore";
+import { useShopCollection, useShopAuditedWrites, useShopUsers, byCreatedDesc } from "../lib/firestore";
 import { useAuth } from "../context/AuthContext";
 import { NO_PERMISSIONS, ALL_PERMISSIONS_ON } from "../lib/permissions";
 import { PERMISSION_KEYS } from "../types";
@@ -22,8 +22,8 @@ function money(n: number) {
 }
 
 function UsersTab() {
-  const { data: users, loading } = useCollection<UserProfile>("users", byCreatedDesc());
-  const { data: roles } = useCollection<Role>("roles");
+  const { data: users, loading } = useShopUsers();
+  const { data: roles } = useShopCollection<Role>("roles");
   const { profile } = useAuth();
 
   const [name, setName] = useState("");
@@ -38,6 +38,10 @@ function UsersTab() {
       setErr("Name and email are required.");
       return;
     }
+    if (!profile?.shopId) {
+      setErr("No shop selected yet.");
+      return;
+    }
     setSaving(true);
     setErr(null);
     try {
@@ -48,6 +52,7 @@ function UsersTab() {
         access,
         roleId: access === "Employee" ? roleId : null,
         status: "Invited",
+        shopId: profile.shopId,
         createdAt: Date.now(),
         createdBy: profile?.name || "Admin",
       });
@@ -153,8 +158,8 @@ function UsersTab() {
 }
 
 function SuppliersTab() {
-  const { data: suppliers, loading } = useCollection<Supplier>("suppliers", byCreatedDesc());
-  const { create } = useAuditedWrites("suppliers");
+  const { data: suppliers, loading } = useShopCollection<Supplier>("suppliers", byCreatedDesc());
+  const { create } = useShopAuditedWrites("suppliers");
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [address, setAddress] = useState("");
@@ -239,8 +244,8 @@ function SuppliersTab() {
 }
 
 function RolesTab() {
-  const { data: roles, loading } = useCollection<Role>("roles", byCreatedDesc());
-  const { create, update } = useAuditedWrites("roles");
+  const { data: roles, loading } = useShopCollection<Role>("roles", byCreatedDesc());
+  const { create, update } = useShopAuditedWrites("roles");
   const [showForm, setShowForm] = useState(false);
   const [newName, setNewName] = useState("");
   const [newPerms, setNewPerms] = useState<PermissionSet>({ ...NO_PERMISSIONS });

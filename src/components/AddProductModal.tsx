@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { uploadToCloudinary } from "../lib/cloudinary";
-import { useAuditedWrites } from "../lib/firestore";
+import { useShopAuditedWrites } from "../lib/firestore";
 import Modal from "./Modal";
 import type { Product } from "../types";
 
@@ -13,7 +13,7 @@ export default function AddProductModal({
   onClose: () => void;
   existing?: Product;
 }) {
-  const { create, update } = useAuditedWrites("products");
+  const { create, update } = useShopAuditedWrites("products");
   const [name, setName] = useState(existing?.name ?? "");
   const [sku, setSku] = useState(existing?.sku ?? "");
   const [category, setCategory] = useState(existing?.category ?? CATEGORIES[0]);

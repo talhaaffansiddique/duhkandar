@@ -32,6 +32,21 @@ export interface UserProfile extends AuditFields {
   access: AccessLevel;
   roleId?: string;
   status: "Active" | "Invited" | "On leave" | "Disabled";
+  shopId: string;
+}
+
+export interface Shop {
+  id: string;
+  name: string;
+  ownerUid: string;
+  createdAt: number;
+  businessName?: string;
+  address?: string;
+  logoUrl?: string;
+  darkModeDefault?: boolean;
+  showSubcategories?: boolean;
+  printReceiptAfterSale?: boolean;
+  seeded?: boolean;
 }
 
 export interface Supplier extends AuditFields {

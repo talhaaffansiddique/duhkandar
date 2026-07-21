@@ -1,5 +1,5 @@
 import { useAuth } from "../context/AuthContext";
-import { useCollection } from "./firestore";
+import { useShopCollection } from "./firestore";
 import type { PermissionKey, PermissionSet, Role } from "../types";
 import { PERMISSION_KEYS } from "../types";
 
@@ -15,7 +15,7 @@ export const NO_PERMISSIONS: PermissionSet = PERMISSION_KEYS.reduce(
 
 export function usePermissions() {
   const { profile } = useAuth();
-  const { data: roles } = useCollection<Role>("roles");
+  const { data: roles } = useShopCollection<Role>("roles");
 
   if (!profile) {
     return { permissions: NO_PERMISSIONS, isAdmin: false, roleName: null as string | null };
