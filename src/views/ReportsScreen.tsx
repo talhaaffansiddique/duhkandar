@@ -99,7 +99,8 @@ function FinancialTab() {
         <select className="input" value={payment} onChange={(e) => setPayment(e.target.value)}>
           <option>All payment types</option>
           <option>Cash</option>
-          <option>Credit</option>
+          <option>Online</option>
+          <option>Card</option>
         </select>
         <button
           className="btn"

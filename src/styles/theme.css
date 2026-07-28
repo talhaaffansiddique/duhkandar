@@ -47,14 +47,15 @@ td,th,strong,p,span,div,label,button,select,option,input,h1,h2,h3{color:inherit}
 .shell{display:grid; grid-template-columns:220px 1fr; min-height:100vh}
 .shell.loggedout{grid-template-columns:1fr}
 .rail{background:var(--surface); border-right:1px solid var(--line); padding:20px 14px; display:flex; flex-direction:column; gap:2px}
-.brand{font-family:var(--serif); font-size:22px; font-weight:700; color:var(--accent); padding:4px 10px 18px}
-.brand span{color:var(--muted); font-family:var(--sans); font-weight:400; font-size:12px; display:block; letter-spacing:.06em; text-transform:uppercase; margin-top:2px}
+.brand{font-family:var(--serif); font-size:21px; font-weight:700; color:var(--accent); padding:4px 10px 18px}
+.brand .shopname{color:var(--ink); font-family:var(--sans); font-weight:600; font-size:13px; display:block; margin-top:3px}
 .navbtn{display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; border:none; background:transparent; color:var(--muted); font-size:14px; text-align:left; cursor:pointer; font-family:var(--sans); text-decoration:none}
 .navbtn:hover{background:var(--surface-2); color:var(--ink)}
 .navbtn.active{background:var(--accent-bg); color:var(--accent-ink); font-weight:600}
 .navbtn .dot{width:6px;height:6px;border-radius:50%;background:var(--line)}
 .navbtn.active .dot{background:var(--accent)}
-.railfoot{margin-top:auto; padding-top:14px; border-top:1px solid var(--line); font-size:11px; color:var(--muted)}
+.railfoot{margin-top:auto; padding-top:14px; border-top:1px solid var(--line); font-size:12px; color:var(--muted); display:flex; flex-direction:column; gap:8px}
+.railfoot .signoutbtn{align-self:flex-start}
 .main{padding:20px 28px 40px; min-width:0; overflow-x:auto}
 .topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px}
 .topbar h1{font-family:var(--serif); font-size:24px; margin:0; font-weight:700}
@@ -70,6 +71,9 @@ td,th,strong,p,span,div,label,button,select,option,input,h1,h2,h3{color:inherit}
 .kpi .delta{font-size:12px; margin-top:4px}
 .up{color:var(--good)} .down{color:var(--bad)}
 .sectitle{font-family:var(--serif); font-size:16px; font-weight:700; margin:0 0 12px}
+.table-wrap{overflow-x:auto}
+.table-wrap.scroll5{max-height:230px; overflow-y:auto}
+.table-wrap.scroll5 thead th{position:sticky; top:0; background:var(--surface); z-index:1}
 table{width:100%; border-collapse:collapse; font-size:13px}
 th{text-align:left; color:var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.04em; padding:8px 10px; border-bottom:1px solid var(--line)}
 td{padding:9px 10px; border-bottom:1px solid var(--line)}
@@ -145,6 +149,41 @@ th.sortable.sorted .arrow{opacity:1; color:var(--accent)}
 .imgslot img{width:100%; height:100%; object-fit:cover; position:absolute; inset:0}
 .linerow{display:grid; grid-template-columns:2fr 1fr 1fr 1fr auto; gap:8px; align-items:center; margin-bottom:8px}
 .linerow input,.linerow select{padding:7px 8px; font-size:12px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink)}
+.variantrow{display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:8px; align-items:center; margin-bottom:8px}
+.variantrow input{padding:7px 8px; font-size:12px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink)}
 .modal-foot{display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-top:16px; padding-top:14px; border-top:1px solid var(--line)}
 .receipt-line{display:flex; justify-content:space-between; font-size:13px; padding:5px 0; border-bottom:1px dashed var(--line)}
 .center-fill{min-height:60vh; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:13px}
+
+.poswrap{display:grid; grid-template-columns:1.5fr 1fr; gap:16px; align-items:start}
+.poscat{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+.posproduct{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:12px; cursor:pointer; text-align:left}
+.posproduct:hover{border-color:var(--accent)}
+.posproduct .pname{font-size:13px; font-weight:600; margin-bottom:4px}
+.posproduct .pmeta{font-size:11px; color:var(--muted)}
+.posproduct .pprice{font-family:var(--mono); font-size:14px; margin-top:6px}
+.cartrow{display:grid; grid-template-columns:1.3fr 50px 75px 75px 75px auto; gap:6px; align-items:center; margin-bottom:8px; font-size:12px}
+.cartrow input{padding:6px 6px; font-size:12px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink); width:100%}
+.cartrow.cartheader{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em}
+.paymethods{display:flex; gap:8px; margin:10px 0}
+.paymethod{flex:1; border:1px solid var(--line); background:var(--surface); border-radius:8px; padding:10px; text-align:center; font-size:13px; cursor:pointer}
+.paymethod.on{border-color:var(--accent); background:var(--accent-bg); color:var(--accent-ink); font-weight:600}
+.postotal-line{display:flex; justify-content:space-between; font-size:13px; padding:4px 0}
+.postotal-line.grand{font-weight:700; font-size:16px; border-top:1px solid var(--line); margin-top:6px; padding-top:10px}
+
+@media (max-width:760px){
+  html,body,#root{overflow-x:hidden}
+  .shell{grid-template-columns:1fr}
+  .shell .rail{position:fixed; left:0; right:0; bottom:0; top:auto; width:100%; height:64px; flex-direction:row; align-items:center; justify-content:space-around; padding:6px 4px; z-index:15; overflow-x:auto; border-right:none; border-top:1px solid var(--line)}
+  .shell .rail .brand,.shell .rail .railfoot{display:none}
+  .shell .rail .navbtn{flex-direction:column; gap:2px; font-size:9px; padding:6px 4px; white-space:nowrap; text-align:center}
+  .shell .rail .navbtn .dot{display:none}
+  .main{padding:14px 12px 84px}
+  .topbar h1{font-size:19px}
+  .grid.g4,.grid.g3,.grid.g2{grid-template-columns:1fr}
+  .poswrap{grid-template-columns:1fr}
+  .poscat{grid-template-columns:repeat(2,1fr)}
+  .settingswrap{grid-template-columns:1fr}
+  .cartrow{grid-template-columns:1.1fr 40px 60px 60px 60px auto}
+  .modal{width:100%}
+}

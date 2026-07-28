@@ -10,11 +10,12 @@ import {
   deleteDoc,
   doc,
   serverTimestamp,
+  runTransaction,
   type QueryConstraint,
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
-import type { UserProfile } from "../types";
+import type { UserProfile, Shop } from "../types";
 
 /**
  * Live-subscribes to a collection. Every write helper below stamps
@@ -100,6 +101,47 @@ export function useShopCollection<T>(name: string, constraints: QueryConstraint[
 export function useShopAuditedWrites(name: string) {
   const path = useShopPath(name);
   return useAuditedWrites(path);
+}
+
+/**
+ * Atomically issues the next receipt number for a shop: yy-mm-dd--NNN,
+ * resetting to 001 on the first sale of each new calendar day. Runs as a
+ * transaction against the shop doc's counter fields so concurrent checkouts
+ * (e.g. two cashiers) never collide on the same number.
+ */
+export async function generateReceiptNumber(shopId: string): Promise<string> {
+  const shopRef = doc(db, "shops", shopId);
+  return runTransaction(db, async (tx) => {
+    const snap = await tx.get(shopRef);
+    const data = snap.data() as { lastReceiptDateKey?: string; lastReceiptSeq?: number } | undefined;
+    const now = new Date();
+    const y = String(now.getFullYear()).slice(-2);
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    const dateKey = `${y}-${m}-${d}`;
+    const seq = data?.lastReceiptDateKey === dateKey ? (data.lastReceiptSeq ?? 0) + 1 : 1;
+    tx.update(shopRef, { lastReceiptDateKey: dateKey, lastReceiptSeq: seq });
+    return `${dateKey}--${String(seq).padStart(3, "0")}`;
+  });
+}
+
+/** Live subscription to the current user's shop document itself (name, address, settings). */
+export function useShopDoc() {
+  const { profile } = useAuth();
+  const shopId = profile?.shopId;
+  const [shop, setShop] = useState<Shop | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!shopId) return;
+    const unsub = onSnapshot(doc(db, "shops", shopId), (snap) => {
+      if (snap.exists()) setShop({ id: snap.id, ...(snap.data() as Omit<Shop, "id">) });
+      setLoading(false);
+    });
+    return unsub;
+  }, [shopId]);
+
+  return { shop, loading };
 }
 
 /**

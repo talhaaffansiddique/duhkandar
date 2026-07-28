@@ -5,7 +5,7 @@ import { useShopAuditedWrites } from "../lib/firestore";
 import { useAuth } from "../context/AuthContext";
 import { usePermissions } from "../lib/permissions";
 import Modal from "../components/Modal";
-import type { Shop } from "../types";
+import type { Shop, WarrantyUnit } from "../types";
 
 function Switch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   return (
@@ -32,7 +32,8 @@ function buildSeedData() {
     stock: 5 + i * 3,
     avgCost: 800 + i * 250,
     price: 1200 + i * 400,
-    warrantyMonths: [0, 3, 6, 12][i % 4],
+    warrantyValue: [0, 3, 6, 1][i % 4],
+    warrantyUnit: (i % 4 === 3 ? "Years" : "Months") as WarrantyUnit,
     images: [] as string[],
   }));
   return { suppliers, products };
@@ -111,7 +112,7 @@ export default function SettingsScreen() {
           customer: i % 2 === 0 ? "Walk-in" : "Sample Hardware Co.",
           items: [{ productId: productRefs[(i + 2) % productRefs.length].id, productName: product.name, qty, unitPrice: product.price }],
           amount: qty * product.price,
-          payment: i % 2 === 0 ? "Cash" : "Credit",
+          payment: (["Cash", "Online", "Card"] as const)[i % 3],
           status: i === 9 ? "Refunded" : "Paid",
           cashierName: profile.name,
         });
@@ -221,6 +222,20 @@ export default function SettingsScreen() {
           <Switch
             on={shop?.printReceiptAfterSale ?? true}
             onToggle={() => save({ printReceiptAfterSale: !(shop?.printReceiptAfterSale ?? true) })}
+          />
+        </div>
+        <div className="rowline">
+          Accept online payments
+          <Switch
+            on={shop?.acceptOnlinePayments ?? true}
+            onToggle={() => save({ acceptOnlinePayments: !(shop?.acceptOnlinePayments ?? true) })}
+          />
+        </div>
+        <div className="rowline">
+          Accept card payments
+          <Switch
+            on={shop?.acceptCardPayments ?? true}
+            onToggle={() => save({ acceptCardPayments: !(shop?.acceptCardPayments ?? true) })}
           />
         </div>
         <div className="field" style={{ marginTop: 12 }}>

@@ -12,6 +12,20 @@ function stockStatus(p: Product): { label: string; cls: string } {
   if (p.stock <= 5) return { label: "Low stock", cls: "warn" };
   return { label: "In stock", cls: "good" };
 }
+function warrantyLabel(p: Product): string {
+  if (!p.warrantyValue) return "—";
+  const unit = p.warrantyUnit === "Years" ? (p.warrantyValue === 1 ? "yr" : "yrs") : "mo";
+  return `${p.warrantyValue} ${unit}`;
+}
+function variantsLabel(p: Product): string {
+  if (!p.variants || p.variants.length === 0) return "—";
+  const sizes = new Set(p.variants.map((v) => v.size).filter(Boolean));
+  const colours = new Set(p.variants.map((v) => v.colour).filter(Boolean));
+  const parts: string[] = [];
+  if (sizes.size) parts.push(`${sizes.size} size${sizes.size > 1 ? "s" : ""}`);
+  if (colours.size) parts.push(`${colours.size} colour${colours.size > 1 ? "s" : ""}`);
+  return parts.join(" · ") || "—";
+}
 
 export default function InventoryScreen() {
   const { data: products, loading } = useShopCollection<Product>("products", byCreatedDesc());
@@ -75,6 +89,7 @@ export default function InventoryScreen() {
               <tr>
                 <th>Product</th>
                 <th>SKU</th>
+                <th>Variants</th>
                 <th className="num">Stock</th>
                 <th className="num">Cost (avg)</th>
                 <th className="num">Price</th>
@@ -90,10 +105,17 @@ export default function InventoryScreen() {
                       {p.name}
                     </td>
                     <td>{p.sku}</td>
+                    <td>
+                      {p.variants && p.variants.length > 0 ? (
+                        <span className="pill neutral">{variantsLabel(p)}</span>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
                     <td className="num">{p.stock}</td>
                     <td className="num">{money(p.avgCost)}</td>
                     <td className="num">{money(p.price)}</td>
-                    <td>{p.warrantyMonths > 0 ? `${p.warrantyMonths} mo` : "—"}</td>
+                    <td>{warrantyLabel(p)}</td>
                     <td>
                       <span className={"pill " + status.cls}>{status.label}</span>
                     </td>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { uploadToCloudinary } from "../lib/cloudinary";
 import { useShopAuditedWrites } from "../lib/firestore";
 import Modal from "./Modal";
-import type { Product } from "../types";
+import type { Product, ProductVariant, WarrantyUnit } from "../types";
 
 const CATEGORIES = ["Sanitary ware", "Fittings", "Other"];
 
@@ -17,14 +17,26 @@ export default function AddProductModal({
   const [name, setName] = useState(existing?.name ?? "");
   const [sku, setSku] = useState(existing?.sku ?? "");
   const [category, setCategory] = useState(existing?.category ?? CATEGORIES[0]);
-  const [warranty, setWarranty] = useState(existing?.warrantyMonths ?? 0);
+  const [warrantyValue, setWarrantyValue] = useState(existing?.warrantyValue ?? 0);
+  const [warrantyUnit, setWarrantyUnit] = useState<WarrantyUnit>(existing?.warrantyUnit ?? "Months");
   const [cost, setCost] = useState(existing?.avgCost ?? 0);
   const [price, setPrice] = useState(existing?.price ?? 0);
   const [stock, setStock] = useState(existing?.stock ?? 0);
   const [images, setImages] = useState<string[]>(existing?.images ?? []);
+  const [variants, setVariants] = useState<ProductVariant[]>(existing?.variants ?? []);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  function addVariant() {
+    setVariants((prev) => [...prev, { size: "", colour: "", stock: 0 }]);
+  }
+  function updateVariant(idx: number, patch: Partial<ProductVariant>) {
+    setVariants((prev) => prev.map((v, i) => (i === idx ? { ...v, ...patch } : v)));
+  }
+  function removeVariant(idx: number) {
+    setVariants((prev) => prev.filter((_, i) => i !== idx));
+  }
 
   async function handleImagePick(idx: number, file: File) {
     setUploading(true);
@@ -52,15 +64,18 @@ export default function AddProductModal({
     setSaving(true);
     setErr(null);
     try {
+      const cleanVariants = variants.filter((v) => v.size.trim() || v.colour.trim());
       const payload = {
         name: name.trim(),
         sku: sku.trim(),
         category,
-        warrantyMonths: Math.min(12, Math.max(0, warranty)),
+        warrantyValue: Math.max(0, warrantyValue),
+        warrantyUnit,
         avgCost: cost,
         price,
         stock,
         images,
+        variants: cleanVariants,
       };
       if (existing) {
         await update(existing.id, payload);
@@ -111,14 +126,20 @@ export default function AddProductModal({
           </select>
         </div>
         <div className="field">
-          <label>Warranty (months, max 12)</label>
-          <input
-            type="number"
-            max={12}
-            min={0}
-            value={warranty}
-            onChange={(e) => setWarranty(Math.min(12, Math.max(0, Number(e.target.value))))}
-          />
+          <label>Warranty</label>
+          <div style={{ display: "flex", gap: 6 }}>
+            <input
+              type="number"
+              min={0}
+              value={warrantyValue}
+              onChange={(e) => setWarrantyValue(Math.max(0, Number(e.target.value)))}
+              style={{ flex: 1 }}
+            />
+            <select value={warrantyUnit} onChange={(e) => setWarrantyUnit(e.target.value as WarrantyUnit)} style={{ flex: 1 }}>
+              <option>Months</option>
+              <option>Years</option>
+            </select>
+          </div>
         </div>
       </div>
       <div className="field-row">
@@ -135,6 +156,36 @@ export default function AddProductModal({
           <input type="number" value={stock} onChange={(e) => setStock(Number(e.target.value))} />
         </div>
       </div>
+
+      <label style={{ fontSize: 12, color: "var(--muted)", display: "block", margin: "4px 0 6px" }}>
+        Variants (size / colour) — optional
+      </label>
+      {variants.length > 0 && (
+        <div className="variantrow" style={{ fontSize: 11, color: "var(--muted)" }}>
+          <span>Size</span>
+          <span>Colour</span>
+          <span>Stock</span>
+          <span />
+        </div>
+      )}
+      {variants.map((v, idx) => (
+        <div className="variantrow" key={idx}>
+          <input value={v.size} onChange={(e) => updateVariant(idx, { size: e.target.value })} placeholder="600x600mm" />
+          <input value={v.colour} onChange={(e) => updateVariant(idx, { colour: e.target.value })} placeholder="Beige" />
+          <input
+            type="number"
+            value={v.stock}
+            onChange={(e) => updateVariant(idx, { stock: Math.max(0, Number(e.target.value)) })}
+          />
+          <button className="btn" style={{ padding: "4px 8px", fontSize: 12 }} onClick={() => removeVariant(idx)}>
+            ×
+          </button>
+        </div>
+      ))}
+      <button className="btn" style={{ margin: "4px 0 14px" }} onClick={addVariant}>
+        + Add variant
+      </button>
+
       <label style={{ fontSize: 12, color: "var(--muted)", display: "block", marginBottom: 4 }}>
         Product images (up to 3)
       </label>

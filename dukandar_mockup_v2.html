@@ -1,0 +1,1160 @@
+<title>Dukandar — screen mockups v2.1</title>
+<style>
+:root{
+  color-scheme: light dark;
+  --bg:#F3F4EF; --surface:#FFFFFF; --surface-2:#EBEDE6;
+  --ink:#1B221F; --muted:#5C6660; --line:#DCDFD6;
+  --accent:#0F6B5C; --accent-ink:#083F35; --accent-bg:#E1F0EB;
+  --warm:#C9862B; --warm-ink:#6E4813; --warm-bg:#FBEEDA;
+  --good:#2E8B57; --good-bg:#E4F3EA; --good-ink:#1B5F3B;
+  --warn:#C9862B; --warn-bg:#FBEEDA; --warn-ink:#6E4813;
+  --bad:#B3432E; --bad-bg:#FBE7E2; --bad-ink:#7A2C1C;
+  --radius:10px;
+  --serif: ui-serif, Georgia, 'Times New Roman', serif;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#15201C; --surface:#1C2824; --surface-2:#223029;
+    --ink:#EAF1EC; --muted:#9FB0A6; --line:#2E3D36;
+    --accent:#3FBE9B; --accent-ink:#BFF0E0; --accent-bg:#1E3A32;
+    --warm:#E0A852; --warm-ink:#F5DDB0; --warm-bg:#3C2F18;
+    --good:#57C78B; --good-bg:#1C3628; --good-ink:#B9F0D2;
+    --warn:#E0A852; --warn-bg:#3C2F18; --warn-ink:#F5DDB0;
+    --bad:#E27860; --bad-bg:#3D231C; --bad-ink:#F6C7B8;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15201C; --surface:#1C2824; --surface-2:#223029;
+  --ink:#EAF1EC; --muted:#9FB0A6; --line:#2E3D36;
+  --accent:#3FBE9B; --accent-ink:#BFF0E0; --accent-bg:#1E3A32;
+  --warm:#E0A852; --warm-ink:#F5DDB0; --warm-bg:#3C2F18;
+  --good:#57C78B; --good-bg:#1C3628; --good-ink:#B9F0D2;
+  --warn:#E0A852; --warn-bg:#3C2F18; --warn-ink:#F5DDB0;
+  --bad:#E27860; --bad-bg:#3D231C; --bad-ink:#F6C7B8;
+}
+:root[data-theme="light"]{
+  --bg:#F3F4EF; --surface:#FFFFFF; --surface-2:#EBEDE6;
+  --ink:#1B221F; --muted:#5C6660; --line:#DCDFD6;
+  --accent:#0F6B5C; --accent-ink:#083F35; --accent-bg:#E1F0EB;
+  --warm:#C9862B; --warm-ink:#6E4813; --warm-bg:#FBEEDA;
+}
+*{box-sizing:border-box}
+body,html{margin:0; color:var(--ink)}
+.app{font-family:var(--sans); color:var(--ink); background:var(--bg); min-height:100vh; overflow-x:auto; position:relative}
+.app,.app *{color:inherit}
+td,th,strong,p,span,div,label,button,select,option,input,h1,h2,h3{color:inherit}
+
+.metabar{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 16px; background:#0B120F; color:#CFE8DE; font-size:12px; flex-wrap:wrap}
+.metabar a,.metabar button.link{color:#7FE0BE; background:none; border:none; cursor:pointer; font-size:12px; text-decoration:underline; padding:0; font-family:var(--sans)}
+.metabar .segs{display:flex; gap:4px; background:rgba(255,255,255,.08); border-radius:8px; padding:3px}
+.metabar .segs button{border:none; background:transparent; color:#CFE8DE; padding:4px 10px; border-radius:6px; font-size:11px; cursor:pointer; font-family:var(--sans)}
+.metabar .segs button.on{background:rgba(255,255,255,.16); color:#fff; font-weight:600}
+
+.shell{display:grid; grid-template-columns:220px 1fr; min-width:980px}
+.shell.loggedout{grid-template-columns:1fr; min-width:0}
+.shell.loggedout .rail{display:none}
+.app.force-mobile .shell{min-width:0; grid-template-columns:1fr}
+.rail{background:var(--surface); border-right:1px solid var(--line); padding:20px 14px; display:flex; flex-direction:column; gap:2px}
+.brand{font-family:var(--serif); font-size:21px; font-weight:700; color:var(--accent); padding:4px 10px 18px}
+.brand .shopname{color:var(--ink); font-family:var(--sans); font-weight:600; font-size:13px; display:block; margin-top:3px}
+.navbtn{display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; border:none; background:transparent; color:var(--muted); font-size:14px; text-align:left; cursor:pointer; font-family:var(--sans)}
+.navbtn:hover{background:var(--surface-2); color:var(--ink)}
+.navbtn.active{background:var(--accent-bg); color:var(--accent-ink); font-weight:600}
+.navbtn .dot{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.navbtn.active .dot{background:var(--accent)}
+.railfoot{margin-top:auto; padding-top:14px; border-top:1px solid var(--line); font-size:12px; color:var(--muted); display:flex; flex-direction:column; gap:8px}
+.railfoot .signoutbtn{align-self:flex-start}
+.main{padding:20px 28px 40px; min-width:0}
+.topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px}
+.topbar h1{font-family:var(--serif); font-size:24px; margin:0; font-weight:700}
+.roleswitch{display:flex; gap:4px; background:var(--surface-2); border-radius:8px; padding:3px}
+.rolebtn{border:none; background:transparent; padding:5px 10px; border-radius:6px; font-size:12px; color:var(--muted); cursor:pointer; font-family:var(--sans)}
+.rolebtn.on{background:var(--surface); color:var(--ink); box-shadow:0 0 0 1px var(--line)}
+.themebtn,.iconbtn{border:1px solid var(--line); background:var(--surface); padding:6px 10px; border-radius:8px; font-size:12px; color:var(--muted); cursor:pointer}
+.badge{font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--warm-ink); background:var(--warm-bg); padding:3px 8px; border-radius:6px; font-weight:600}
+.grid{display:grid; gap:14px}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g2{grid-template-columns:2fr 1fr}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px}
+.kpi .label{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em}
+.kpi .value{font-family:var(--mono); font-size:26px; font-weight:600; margin-top:6px}
+.kpi .delta{font-size:12px; margin-top:4px}
+.up{color:var(--good)} .down{color:var(--bad)}
+.sectitle{font-family:var(--serif); font-size:16px; font-weight:700; margin:0 0 12px}
+.table-wrap{overflow-x:auto}
+.table-wrap.scroll5{max-height:230px; overflow-y:auto}
+.table-wrap.scroll5 table{display:table}
+.table-wrap.scroll5 thead th{position:sticky; top:0; background:var(--surface); z-index:1}
+table{width:100%; border-collapse:collapse; font-size:13px}
+th{text-align:left; color:var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.04em; padding:8px 10px; border-bottom:1px solid var(--line)}
+td{padding:9px 10px; border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+.num{font-family:var(--mono); text-align:right; font-variant-numeric:tabular-nums}
+.pill{font-size:11px; padding:3px 8px; border-radius:20px; font-weight:600; display:inline-block}
+.pill.good{background:var(--good-bg); color:var(--good-ink)}
+.pill.warn{background:var(--warn-bg); color:var(--warn-ink)}
+.pill.bad{background:var(--bad-bg); color:var(--bad-ink)}
+.pill.neutral{background:var(--surface-2); color:var(--muted)}
+.btn{font-family:var(--sans); font-size:13px; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600}
+.btn.danger{color:var(--bad); border-color:var(--bad-bg)}
+.toolbar{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; align-items:center}
+.input{border:1px solid var(--line); background:var(--surface); border-radius:8px; padding:8px 10px; font-size:13px; color:var(--ink); font-family:var(--sans)}
+.thumb{width:34px; height:34px; border-radius:6px; background:var(--surface-2); display:inline-flex; align-items:center; justify-content:center; font-size:14px; color:var(--muted); vertical-align:middle; margin-right:8px}
+.screen{display:none}
+.screen.active{display:block}
+.authwrap{min-height:520px; display:flex; align-items:center; justify-content:center; background:var(--surface-2); border-radius:12px}
+.authcard{width:360px; max-width:100%; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:28px}
+.authcard h2{font-family:var(--serif); text-align:center; margin:0 0 4px}
+.authcard p.sub{text-align:center; color:var(--muted); font-size:13px; margin:0 0 20px}
+.field{margin-bottom:12px}
+.field label{font-size:12px; color:var(--muted); display:block; margin-bottom:4px}
+.field input,.field select{width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink); font-size:14px; font-family:var(--sans)}
+.field-row{display:flex; gap:10px}
+.field-row .field{flex:1}
+.divider{display:flex; align-items:center; gap:10px; color:var(--muted); font-size:11px; margin:16px 0; text-transform:uppercase; letter-spacing:.05em}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+.googlebtn{width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:9px; border:1px solid var(--line); border-radius:8px; background:var(--surface); font-size:13px; font-weight:600; cursor:pointer; color:var(--ink)}
+.gicon{width:16px;height:16px;border-radius:3px;background:conic-gradient(from 0deg,#EA4335 0 90deg,#FBBC05 90deg 180deg,#34A853 180deg 270deg,#4285F4 270deg 360deg)}
+.togglebtn{background:none;border:none;font-size:12px;color:var(--accent);cursor:pointer;text-align:center;width:100%;margin-top:14px}
+.bars{display:flex; align-items:flex-end; gap:8px; height:120px; padding-top:10px}
+.bar{flex:1; background:var(--accent); border-radius:4px 4px 0 0; position:relative}
+.bar span{position:absolute; bottom:-18px; left:0; right:0; text-align:center; font-size:10px; color:var(--muted)}
+.pie{width:96px;height:96px;border-radius:50%; flex-shrink:0}
+.legend{display:flex; flex-direction:column; gap:6px; font-size:12px}
+.legend .sw{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:6px}
+.settingswrap{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+.rowline{display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--line); font-size:13px}
+.rowline:last-child{border-bottom:none}
+.switch{width:34px;height:19px;border-radius:20px;background:var(--line);position:relative; flex-shrink:0; border:none; cursor:pointer; padding:0}
+.switch.on{background:var(--accent)}
+.switch i{position:absolute; top:2px; left:2px; width:15px; height:15px; border-radius:50%; background:#fff}
+.switch.on i{left:17px}
+.tabs2{display:flex; gap:4px; background:var(--surface-2); border-radius:8px; padding:3px; width:fit-content; margin-bottom:14px}
+.tab2{border:none;background:transparent;padding:6px 12px;border-radius:6px;font-size:12px;color:var(--muted);cursor:pointer}
+.tab2.on{background:var(--surface); color:var(--ink); box-shadow:0 0 0 1px var(--line)}
+.subscreen{display:none}
+.subscreen.active{display:block}
+.foot-note{font-size:11px; color:var(--muted); margin-top:10px; display:flex; align-items:center; gap:5px}
+.foot-note i{width:5px;height:5px;border-radius:50%;background:var(--accent); display:inline-block; flex-shrink:0}
+.perm{display:grid; grid-template-columns:repeat(2,1fr); gap:4px 14px; font-size:12px; margin-top:8px}
+.perm label{display:flex; align-items:center; gap:6px; color:var(--muted)}
+.clickable{cursor:pointer; transition:border-color .12s, transform .12s}
+.clickable:hover{border-color:var(--accent); transform:translateY(-1px)}
+.kpi.clickable .label{display:flex; align-items:center; justify-content:space-between}
+tr.clickrow{cursor:pointer}
+tr.clickrow:hover td{background:var(--surface-2)}
+.legend.clickable div{cursor:pointer; padding:2px 4px; border-radius:5px}
+.legend.clickable div:hover{background:var(--surface-2)}
+th.sortable{cursor:pointer; user-select:none}
+th.sortable:hover{color:var(--ink)}
+th.sortable .arrow{font-size:9px; margin-left:3px; opacity:.5}
+th.sortable.sorted .arrow{opacity:1; color:var(--accent)}
+.overlay{position:absolute; inset:0; background:rgba(10,15,12,.45); display:none; align-items:flex-start; justify-content:center; padding:40px 20px; z-index:20; overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:var(--surface); border:1px solid var(--line); border-radius:12px; width:560px; max-width:100%; padding:22px 24px; box-shadow:0 12px 32px rgba(0,0,0,.18)}
+.modal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px}
+.modal-head h3{font-family:var(--serif); margin:0; font-size:18px}
+.modal-close{border:none; background:var(--surface-2); width:26px; height:26px; border-radius:50%; cursor:pointer; color:var(--muted); font-size:14px}
+.imgrow{display:flex; gap:8px; margin:6px 0 14px}
+.imgslot{flex:1; aspect-ratio:1; border:1.5px dashed var(--line); border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:11px; text-align:center}
+.linerow{display:grid; grid-template-columns:2fr 1fr 1fr 1fr auto; gap:8px; align-items:center; margin-bottom:8px}
+.linerow input,.linerow select{padding:7px 8px; font-size:12px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink)}
+.variantrow{display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:8px; align-items:center; margin-bottom:8px}
+.variantrow input,.variantrow select{padding:7px 8px; font-size:12px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink)}
+.attach-tabs{display:flex; gap:4px; margin-bottom:10px}
+.modal-foot{display:flex; justify-content:flex-end; gap:8px; margin-top:16px; padding-top:14px; border-top:1px solid var(--line); flex-wrap:wrap}
+.receipt-line{display:flex; justify-content:space-between; font-size:13px; padding:5px 0; border-bottom:1px dashed var(--line)}
+.reptabs{display:flex; gap:4px; background:var(--surface-2); border-radius:8px; padding:3px; width:fit-content; margin-bottom:14px}
+
+.poswrap{display:grid; grid-template-columns:1.5fr 1fr; gap:16px; align-items:start}
+.poscat{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+.posproduct{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:12px; cursor:pointer; text-align:left}
+.posproduct:hover{border-color:var(--accent)}
+.posproduct .pname{font-size:13px; font-weight:600; margin-bottom:4px}
+.posproduct .pmeta{font-size:11px; color:var(--muted)}
+.posproduct .pprice{font-family:var(--mono); font-size:14px; margin-top:6px}
+.cartrow{display:grid; grid-template-columns:1.3fr 50px 75px 75px 75px auto; gap:6px; align-items:center; margin-bottom:8px; font-size:12px}
+.cartrow input{padding:6px 6px; font-size:12px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink); width:100%}
+.cartrow.cartheader{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em}
+.paymethods{display:flex; gap:8px; margin:10px 0}
+.paymethod{flex:1; border:1px solid var(--line); background:var(--surface); border-radius:8px; padding:10px; text-align:center; font-size:13px; cursor:pointer}
+.paymethod.on{border-color:var(--accent); background:var(--accent-bg); color:var(--accent-ink); font-weight:600}
+.postotal-line{display:flex; justify-content:space-between; font-size:13px; padding:4px 0}
+.postotal-line.grand{font-weight:700; font-size:16px; border-top:1px solid var(--line); margin-top:6px; padding-top:10px}
+
+.saroot{background:#0F1613; min-height:100vh}
+.saroot .topbar2{display:flex; align-items:center; justify-content:space-between; padding:16px 26px; border-bottom:1px solid #24312B}
+.saroot .brand2{font-family:var(--serif); font-size:19px; font-weight:700; color:#EAF1EC}
+.saroot .brand2 span{background:var(--bad); color:#fff; font-size:10px; padding:2px 7px; border-radius:5px; margin-left:8px; letter-spacing:.05em; vertical-align:middle}
+.saroot .sub2{color:#8FA69B; font-size:12px; margin-top:2px}
+.saroot .satabs{display:flex; gap:4px; padding:0 26px; border-bottom:1px solid #24312B}
+.saroot .satab{border:none; background:transparent; color:#8FA69B; padding:12px 14px; font-size:13px; cursor:pointer; border-bottom:2px solid transparent; font-family:var(--sans)}
+.saroot .satab.on{color:#fff; border-color:var(--accent)}
+.saroot .samain{padding:20px 26px 50px; color:#EAF1EC}
+.saroot .card{background:#17211D; border:1px solid #24312B; color:#EAF1EC}
+.saroot .kpi .label{color:#8FA69B}
+.saroot th{color:#8FA69B; border-color:#24312B}
+.saroot td{border-color:#24312B}
+.saroot .input{background:#17211D; border-color:#2C3A34; color:#EAF1EC}
+
+@media (max-width:760px){
+  .app{overflow-x:hidden}
+  .shell{grid-template-columns:1fr; min-width:0}
+  .shell .rail{position:fixed; left:0; right:0; bottom:0; top:auto; width:100%; height:64px; flex-direction:row; align-items:center; justify-content:space-around; padding:6px 4px; z-index:15; overflow-x:auto}
+  .shell .rail .brand,.shell .rail .railfoot{display:none}
+  .shell .rail .navbtn{flex-direction:column; gap:2px; font-size:9px; padding:6px 4px; white-space:nowrap; text-align:center}
+  .shell .rail .navbtn .dot{display:none}
+  .main{padding:14px 12px 84px}
+  .topbar h1{font-size:19px}
+  .grid.g4,.grid.g3,.grid.g2{grid-template-columns:1fr}
+  .poswrap{grid-template-columns:1fr}
+  .poscat{grid-template-columns:repeat(2,1fr)}
+  .settingswrap{grid-template-columns:1fr}
+  .cartrow{grid-template-columns:1.1fr 40px 60px 60px 60px auto}
+  .saroot .topbar2{padding:12px 14px; flex-direction:column; align-items:flex-start; gap:8px}
+  .saroot .satabs{padding:0 14px}
+  .saroot .samain{padding:14px}
+}
+.app.force-mobile{overflow-x:hidden; max-width:390px; margin:0 auto; border-left:1px solid var(--line); border-right:1px solid var(--line)}
+.app.force-mobile .shell .rail{position:fixed; left:0; right:0; bottom:0; top:auto; width:100%; max-width:390px; margin:0 auto; height:64px; flex-direction:row; align-items:center; justify-content:space-around; padding:6px 4px; z-index:15; overflow-x:auto}
+.app.force-mobile .shell .rail .brand,.app.force-mobile .shell .rail .railfoot{display:none}
+.app.force-mobile .shell .rail .navbtn{flex-direction:column; gap:2px; font-size:9px; padding:6px 4px; white-space:nowrap; text-align:center}
+.app.force-mobile .shell .rail .navbtn .dot{display:none}
+.app.force-mobile .main{padding:14px 12px 84px}
+.app.force-mobile .topbar h1{font-size:19px}
+.app.force-mobile .grid.g4,.app.force-mobile .grid.g3,.app.force-mobile .grid.g2{grid-template-columns:1fr}
+.app.force-mobile .poswrap{grid-template-columns:1fr}
+.app.force-mobile .poscat{grid-template-columns:repeat(2,1fr)}
+.app.force-mobile .settingswrap{grid-template-columns:1fr}
+.app.force-mobile .cartrow{grid-template-columns:1.4fr 55px 70px 55px auto}
+</style>
+
+<div class="metabar">
+  <div>Mockup v2.1 — click around to explore. <a href="#" id="viewChangelogLink">View what changed since v1 →</a></div>
+  <div style="display:flex; align-items:center; gap:12px">
+    <div class="segs" id="viewportSegs">
+      <button class="on" data-mode="desktop">Desktop</button>
+      <button data-mode="mobile">Mobile preview</button>
+    </div>
+    <button class="link" id="toSuperAdminLink">Switch to Super Admin view →</button>
+  </div>
+</div>
+
+<div class="app" id="shopAppRoot">
+<div class="shell loggedout" id="shell">
+  <div class="rail">
+    <div class="brand">Dukandar<span class="shopname" id="shopNameLabel">Rafiq Sanitary Traders</span></div>
+    <button class="navbtn active" data-s="dash"><span class="dot"></span>Dashboard</button>
+    <button class="navbtn" data-s="pos"><span class="dot"></span>POS</button>
+    <button class="navbtn" data-s="inv"><span class="dot"></span>Inventory</button>
+    <button class="navbtn" data-s="purch"><span class="dot"></span>Purchases</button>
+    <button class="navbtn" data-s="expense"><span class="dot"></span>Expense</button>
+    <button class="navbtn" data-s="reports"><span class="dot"></span>Reports</button>
+    <button class="navbtn" data-s="master"><span class="dot"></span>Master</button>
+    <button class="navbtn" data-s="settings"><span class="dot"></span>Settings</button>
+    <div class="railfoot">
+      <span>talhaaffansiddique@gmail.com</span>
+      <button class="btn signoutbtn" id="signOutBtn">&#8618; Sign out</button>
+    </div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <h1 id="title">Sign in</h1>
+      <div style="display:flex; gap:10px; align-items:center" id="topRight">
+        <span class="badge">Mockup — click to browse</span>
+        <div class="roleswitch">
+          <button class="rolebtn on">Owner</button>
+          <button class="rolebtn">Employee</button>
+        </div>
+        <button class="themebtn" id="themeToggle">Toggle theme</button>
+      </div>
+    </div>
+
+    <div class="screen active" id="s-auth">
+      <div class="authwrap">
+        <div class="authcard">
+          <h2>Welcome back</h2>
+          <p class="sub">Sign in to your Dukandar account</p>
+          <div class="field"><label>Email</label><input value="owner@rafiqtraders.pk" readonly></div>
+          <div class="field"><label>Password</label><input type="password" value="••••••••" readonly></div>
+          <button class="btn primary" id="signInBtn" style="width:100%; padding:10px">Sign in</button>
+          <div class="divider">or</div>
+          <button class="googlebtn" id="googleSignInBtn"><span class="gicon"></span> Continue with Google</button>
+          <button class="togglebtn">Don't have an account? Create one</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="s-dash">
+      <p style="font-size:12px; color:var(--muted); margin:-6px 0 14px">Every number below is clickable — it opens the report or screen it was calculated from.</p>
+      <div class="grid g4" style="margin-bottom:16px">
+        <div class="card kpi clickable" data-goto="reports" data-repsub="financial"><div class="label">Today's sales</div><div class="value">Rs 48,250</div><div class="delta up">▲ 12% vs yesterday</div></div>
+        <div class="card kpi clickable" data-goto="reports" data-repsub="financial"><div class="label">Today's profit</div><div class="value">Rs 11,940</div><div class="delta up">▲ 8%</div></div>
+        <div class="card kpi clickable" data-goto="inv"><div class="label">Low stock items</div><div class="value">6</div><div class="delta down">▼ needs reorder</div></div>
+        <div class="card kpi clickable" data-goto="master" data-mastersub="suppliers"><div class="label">Pending dues</div><div class="value">Rs 22,800</div><div class="delta">4 suppliers</div></div>
+      </div>
+      <div class="grid g2">
+        <div class="card clickable" data-goto="reports" data-repsub="financial">
+          <p class="sectitle">Weekly sales</p>
+          <div class="bars">
+            <div class="bar" style="height:40%"><span>Mon</span></div>
+            <div class="bar" style="height:55%"><span>Tue</span></div>
+            <div class="bar" style="height:35%"><span>Wed</span></div>
+            <div class="bar" style="height:70%"><span>Thu</span></div>
+            <div class="bar" style="height:60%"><span>Fri</span></div>
+            <div class="bar" style="height:95%"><span>Sat</span></div>
+            <div class="bar" style="height:50%"><span>Sun</span></div>
+          </div>
+          <p style="font-size:11px; color:var(--muted); margin:22px 0 0">From the sales register — click to open Reports → Financial.</p>
+        </div>
+        <div class="card">
+          <p class="sectitle">Category split</p>
+          <div style="display:flex; gap:16px; align-items:center">
+            <div class="pie" style="background:conic-gradient(var(--accent) 0 45%, var(--warm) 45% 72%, var(--line) 72% 100%)"></div>
+            <div class="legend clickable">
+              <div data-goto="inv" data-invfilter="Sanitary ware"><span class="sw" style="background:var(--accent)"></span>Sanitary ware — 45%</div>
+              <div data-goto="inv" data-invfilter="Fittings"><span class="sw" style="background:var(--warm)"></span>Fittings — 27%</div>
+              <div data-goto="inv" data-invfilter="Other"><span class="sw" style="background:var(--line)"></span>Other — 28%</div>
+            </div>
+          </div>
+          <p style="font-size:11px; color:var(--muted); margin:12px 0 0">From product categories in Inventory — click a slice to filter there.</p>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <p class="sectitle">Recent transactions</p>
+        <div class="table-wrap scroll5"><table>
+          <thead><tr><th>Time</th><th>Customer</th><th>Items</th><th class="num">Amount</th><th>Status</th></tr></thead>
+          <tbody id="dashRecentBody"></tbody>
+        </table></div>
+        <div class="foot-note"><i></i>Showing the last 25 transactions, 5 at a time — scroll for more. Click a row to open the original receipt.</div>
+      </div>
+    </div>
+
+    <div class="screen" id="s-pos">
+      <div class="poswrap">
+        <div>
+          <input class="input" id="posSearch" placeholder="Search products or SKU" style="width:100%; margin-bottom:12px">
+          <div class="poscat" id="posCatalog"></div>
+        </div>
+        <div class="card">
+          <p class="sectitle">Cart</p>
+          <div class="cartrow cartheader" id="posCartHeader" style="display:none"><span>Product</span><span>Qty</span><span>Price</span><span>Warranty</span><span>Total</span><span></span></div>
+          <div id="posCartRows"></div>
+          <p id="posCartEmpty" style="font-size:12px; color:var(--muted)">Click a product to add it to the cart.</p>
+
+          <div class="field" style="margin-top:12px">
+            <label>Customer name (optional)</label>
+            <input id="posCustomer" placeholder="Walk-in Customer">
+          </div>
+
+          <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px">Payment method</label>
+          <div class="paymethods" id="posPayMethods">
+            <button class="paymethod on" data-pay="Cash">Cash</button>
+            <button class="paymethod" data-pay="Online">Online</button>
+            <button class="paymethod" data-pay="Card" id="posCardOption">Card</button>
+          </div>
+
+          <div class="postotal-line"><span>Subtotal</span><span class="num" id="posSubtotal">Rs 0</span></div>
+          <div class="postotal-line grand"><span>Total</span><span class="num" id="posTotal">Rs 0</span></div>
+
+          <button class="btn primary" id="posCheckoutBtn" style="width:100%; margin-top:12px; padding:11px">Checkout</button>
+          <div class="foot-note" style="margin-top:10px"><i></i>Checkout opens a receipt preview — the sale is only recorded once you click Complete sale (or saved for later as a draft). Closing the preview keeps your cart exactly as it was.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="s-inv">
+      <div class="toolbar">
+        <input class="input" placeholder="Search products or SKU" style="flex:1">
+        <select class="input" id="invCategoryFilter"><option>All categories</option><option>Sanitary ware</option><option>Fittings</option><option>Other</option></select>
+        <button class="btn primary" id="openAddProduct">+ Add product</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap"><table>
+          <tr><th>Product</th><th>SKU</th><th>Variants</th><th class="num">Stock</th><th class="num">Cost (avg)</th><th class="num">Price</th><th>Warranty</th><th>Status</th></tr>
+          <tr><td><span class="thumb">▦</span>Commode — Ivory 1pc</td><td>SAN-1042</td><td>—</td><td class="num">14</td><td class="num">4,200</td><td class="num">6,500</td><td>1 yr</td><td><span class="pill good">In stock</span></td></tr>
+          <tr><td><span class="thumb">▦</span>Basin Mixer Tap</td><td>FIT-2210</td><td>—</td><td class="num">3</td><td class="num">1,850</td><td class="num">2,950</td><td>6 mo</td><td><span class="pill warn">Low stock</span></td></tr>
+          <tr><td><span class="thumb">▦</span>Ceramic Floor Tile</td><td>TIL-3305</td><td><span class="pill neutral">3 sizes · 4 colours</span></td><td class="num">140</td><td class="num">180</td><td class="num">320</td><td>2 yr</td><td><span class="pill good">In stock</span></td></tr>
+          <tr><td><span class="thumb">▦</span>Shower Head — Rain</td><td>SAN-1180</td><td>—</td><td class="num">22</td><td class="num">1,100</td><td class="num">1,800</td><td>3 mo</td><td><span class="pill good">In stock</span></td></tr>
+        </table></div>
+        <div class="foot-note"><i></i>Add/edit/delete on every product is logged with who and when for later audit export.</div>
+      </div>
+    </div>
+
+    <div class="screen" id="s-purch">
+      <div class="toolbar">
+        <button class="btn primary" id="openRecordPurchase">+ Record purchase</button>
+        <select class="input"><option>All suppliers</option><option>Rafiq Sanitary Supplies</option><option>Al-Karam Traders</option></select>
+      </div>
+      <div class="card">
+        <div class="table-wrap"><table>
+          <tr><th>Date</th><th>Supplier</th><th>Invoice</th><th class="num">Items</th><th class="num">Total</th><th>Attachment</th><th>Status</th></tr>
+          <tr><td>Jul 18</td><td>Rafiq Sanitary Supplies</td><td>INV-7741</td><td class="num">40</td><td class="num">Rs 168,000</td><td>📎 photo.jpg</td><td><span class="pill good">Paid</span></td></tr>
+          <tr><td>Jul 15</td><td>Al-Karam Traders</td><td>INV-0231</td><td class="num">15</td><td class="num">Rs 44,250</td><td>📎 scan.pdf</td><td><span class="pill warn">Partial</span></td></tr>
+          <tr><td>Jul 09</td><td>Rafiq Sanitary Supplies</td><td>INV-7688</td><td class="num">60</td><td class="num">Rs 231,000</td><td>—</td><td><span class="pill bad">Unpaid</span></td></tr>
+        </table></div>
+        <div class="foot-note"><i></i>Suppliers here are pulled live from Master → Suppliers.</div>
+      </div>
+    </div>
+
+    <div class="screen" id="s-reports">
+      <div class="reptabs">
+        <button class="tab2 tab2rsub on" data-repsub="financial">Financial</button>
+        <button class="tab2 tab2rsub" data-repsub="inventory">Inventory</button>
+        <button class="tab2 tab2rsub" data-repsub="purchase">Purchase</button>
+      </div>
+
+      <div class="subscreen active" id="r-financial">
+        <div class="toolbar">
+          <input class="input" type="date" value="2026-07-14">
+          <span style="color:var(--muted); font-size:13px">to</span>
+          <input class="input" type="date" value="2026-07-20">
+          <select class="input"><option>All payment types</option><option>Cash</option><option>Online</option><option>Card</option></select>
+          <button class="btn">Apply filters</button>
+          <button class="btn" style="margin-left:auto">Export PDF</button>
+        </div>
+        <div class="grid g4" style="margin-bottom:14px">
+          <div class="card kpi"><div class="label">Gross sales</div><div class="value">Rs 312,400</div></div>
+          <div class="card kpi"><div class="label">Expenses</div><div class="value">Rs 26,500</div></div>
+          <div class="card kpi"><div class="label">Refunds</div><div class="value">Rs 4,600</div></div>
+          <div class="card kpi"><div class="label">Net profit (P&amp;L)</div><div class="value">Rs 51,650</div></div>
+        </div>
+        <div class="card">
+          <div class="table-wrap"><table class="sortable-table">
+            <tr>
+              <th class="sortable" data-type="text">Receipt #<span class="arrow">▲▼</span></th>
+              <th class="sortable" data-type="text">Date<span class="arrow">▲▼</span></th>
+              <th class="sortable" data-type="text">Customer<span class="arrow">▲▼</span></th>
+              <th class="sortable num" data-type="num">Amount<span class="arrow">▲▼</span></th>
+              <th class="sortable" data-type="text">Payment<span class="arrow">▲▼</span></th>
+              <th></th>
+            </tr>
+            <tr><td>RCP-3391</td><td>Jul 20</td><td>Walk-in Customer</td><td class="num">Rs 3,450</td><td>Cash</td><td><button class="btn" style="padding:4px 10px; font-size:12px">Refund</button></td></tr>
+            <tr><td>RCP-3390</td><td>Jul 20</td><td>Ali Hardware</td><td class="num">Rs 18,900</td><td>Online</td><td><button class="btn" style="padding:4px 10px; font-size:12px">Refund</button></td></tr>
+            <tr><td>RCP-3389</td><td>Jul 19</td><td>Walk-in Customer</td><td class="num">Rs 650</td><td>Card</td><td><button class="btn" style="padding:4px 10px; font-size:12px">Refund</button></td></tr>
+          </table></div>
+          <div class="foot-note"><i></i>Net profit deducts recorded expenses from gross margin. Click any column header to sort.</div>
+        </div>
+      </div>
+
+      <div class="subscreen" id="r-inventory">
+        <div class="toolbar">
+          <select class="input"><option>All categories</option><option>Sanitary ware</option><option>Fittings</option></select>
+          <select class="input"><option>All stock status</option><option>In stock</option><option>Low stock</option><option>Out of stock</option></select>
+          <button class="btn" style="margin-left:auto">Export PDF</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap"><table class="sortable-table">
+            <tr>
+              <th class="sortable" data-type="text">Product<span class="arrow">▲▼</span></th>
+              <th class="sortable" data-type="text">SKU<span class="arrow">▲▼</span></th>
+              <th class="sortable num" data-type="num">Stock<span class="arrow">▲▼</span></th>
+              <th class="sortable num" data-type="num">Cost (avg)<span class="arrow">▲▼</span></th>
+              <th class="sortable num" data-type="num">Price<span class="arrow">▲▼</span></th>
+              <th class="sortable num" data-type="num">Value on hand<span class="arrow">▲▼</span></th>
+              <th>Status</th>
+            </tr>
+            <tr><td>Commode — Ivory 1pc</td><td>SAN-1042</td><td class="num">14</td><td class="num">4,200</td><td class="num">6,500</td><td class="num">58,800</td><td><span class="pill good">In stock</span></td></tr>
+            <tr><td>Basin Mixer Tap</td><td>FIT-2210</td><td class="num">3</td><td class="num">1,850</td><td class="num">2,950</td><td class="num">5,550</td><td><span class="pill warn">Low stock</span></td></tr>
+            <tr><td>Ceramic Floor Tile</td><td>TIL-3305</td><td class="num">140</td><td class="num">180</td><td class="num">320</td><td class="num">25,200</td><td><span class="pill good">In stock</span></td></tr>
+            <tr><td>Shower Head — Rain</td><td>SAN-1180</td><td class="num">22</td><td class="num">1,100</td><td class="num">1,800</td><td class="num">24,200</td><td><span class="pill good">In stock</span></td></tr>
+          </table></div>
+          <div class="foot-note"><i></i>Stock valuation report — value on hand uses weighted-average cost. Click a header to sort.</div>
+        </div>
+      </div>
+
+      <div class="subscreen" id="r-purchase">
+        <div class="toolbar">
+          <input class="input" type="date" value="2026-07-01">
+          <span style="color:var(--muted); font-size:13px">to</span>
+          <input class="input" type="date" value="2026-07-20">
+          <select class="input"><option>All suppliers</option><option>Rafiq Sanitary Supplies</option><option>Al-Karam Traders</option></select>
+          <button class="btn" style="margin-left:auto">Export PDF</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap"><table class="sortable-table">
+            <tr>
+              <th class="sortable" data-type="text">Date<span class="arrow">▲▼</span></th>
+              <th class="sortable" data-type="text">Supplier<span class="arrow">▲▼</span></th>
+              <th class="sortable" data-type="text">Invoice<span class="arrow">▲▼</span></th>
+              <th class="sortable num" data-type="num">Items<span class="arrow">▲▼</span></th>
+              <th class="sortable num" data-type="num">Total<span class="arrow">▲▼</span></th>
+              <th>Status</th>
+            </tr>
+            <tr><td>Jul 18</td><td>Rafiq Sanitary Supplies</td><td>INV-7741</td><td class="num">40</td><td class="num">168,000</td><td><span class="pill good">Paid</span></td></tr>
+            <tr><td>Jul 15</td><td>Al-Karam Traders</td><td>INV-0231</td><td class="num">15</td><td class="num">44,250</td><td><span class="pill warn">Partial</span></td></tr>
+            <tr><td>Jul 09</td><td>Rafiq Sanitary Supplies</td><td>INV-7688</td><td class="num">60</td><td class="num">231,000</td><td><span class="pill bad">Unpaid</span></td></tr>
+          </table></div>
+          <div class="foot-note"><i></i>Mirrors Master → Suppliers outstanding balances. Click a header to sort.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="s-expense">
+      <div class="grid g2">
+        <div class="card">
+          <p class="sectitle">Add expense</p>
+          <div class="field"><label>Date</label><input type="date" value="2026-07-21"></div>
+          <div class="field"><label>Category</label>
+            <select><option>Rent</option><option>Utilities</option><option>Salaries</option><option>Transport</option><option>Miscellaneous</option></select>
+          </div>
+          <div class="field"><label>Amount (Rs)</label><input type="number" value="2500"></div>
+          <div class="field"><label>Note</label><input value="Electricity bill — July"></div>
+          <button class="btn primary" style="width:100%">Save expense</button>
+        </div>
+        <div class="card">
+          <p class="sectitle">This month</p>
+          <div class="kpi"><div class="label">Total expenses</div><div class="value">Rs 26,500</div></div>
+          <div class="legend" style="margin-top:14px">
+            <div><span class="sw" style="background:var(--accent)"></span>Rent — Rs 15,000</div>
+            <div><span class="sw" style="background:var(--warm)"></span>Utilities — Rs 6,500</div>
+            <div><span class="sw" style="background:var(--line)"></span>Transport — Rs 5,000</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <p class="sectitle">Expense log</p>
+        <div class="table-wrap"><table>
+          <tr><th>Date</th><th>Category</th><th>Note</th><th class="num">Amount</th><th>Added by</th></tr>
+          <tr><td>Jul 20</td><td>Utilities</td><td>Electricity bill — July</td><td class="num">Rs 6,500</td><td>Waseem Akhtar</td></tr>
+          <tr><td>Jul 05</td><td>Rent</td><td>Shop rent — July</td><td class="num">Rs 15,000</td><td>Waseem Akhtar</td></tr>
+          <tr><td>Jul 02</td><td>Transport</td><td>Delivery fuel</td><td class="num">Rs 5,000</td><td>Sana Malik</td></tr>
+        </table></div>
+        <div class="foot-note"><i></i>Feeds directly into the P&amp;L figure on the Reports screen.</div>
+      </div>
+    </div>
+
+    <div class="screen" id="s-master">
+      <div class="tabs2">
+        <button class="tab2 tab2msub on" data-sub="users">Users</button>
+        <button class="tab2 tab2msub" data-sub="suppliers">Suppliers</button>
+        <button class="tab2 tab2msub" data-sub="roles">Roles &amp; permissions</button>
+      </div>
+
+      <div class="subscreen active" id="m-users">
+        <div class="toolbar"><button class="btn primary">+ Add user</button></div>
+        <div class="card">
+          <div class="table-wrap"><table>
+            <tr><th>Name</th><th>Email</th><th>Access</th><th>Profile</th><th>Status</th><th>Added</th></tr>
+            <tr><td>Waseem Akhtar</td><td>owner@rafiqtraders.pk</td><td><span class="pill good">Admin</span></td><td>Full rights</td><td><span class="pill good">Active</span></td><td>Jan 3, 2026</td></tr>
+            <tr><td>Sana Malik</td><td>sana@rafiqtraders.pk</td><td><span class="pill neutral">Employee</span></td><td>Cashier</td><td><span class="pill good">Active</span></td><td>Mar 11, 2026</td></tr>
+            <tr><td>Imran Ali</td><td>imran@rafiqtraders.pk</td><td><span class="pill neutral">Employee</span></td><td>Stock manager</td><td><span class="pill warn">On leave</span></td><td>Apr 22, 2026</td></tr>
+          </table></div>
+          <div class="foot-note"><i></i>Admin always has complete rights; every other user must carry a profile from Roles &amp; permissions.</div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <p class="sectitle">New user</p>
+          <div class="field-row">
+            <div class="field"><label>Full name</label><input value="Bilal Sheikh"></div>
+            <div class="field"><label>Email</label><input value="bilal@rafiqtraders.pk"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Access level</label>
+              <select><option>Employee</option><option>Admin</option></select>
+            </div>
+            <div class="field"><label>Profile (employee only)</label>
+              <select><option>Cashier</option><option>Stock manager</option><option>Accountant</option></select>
+            </div>
+          </div>
+          <button class="btn primary">Create user</button>
+        </div>
+      </div>
+
+      <div class="subscreen" id="m-suppliers">
+        <div class="toolbar"><button class="btn primary">+ Add supplier</button></div>
+        <div class="card">
+          <div class="table-wrap"><table>
+            <tr><th>Supplier</th><th>Contact</th><th>Address</th><th class="num">Outstanding</th><th>Added</th></tr>
+            <tr><td>Rafiq Sanitary Supplies</td><td>0300-5551234</td><td>Site Area, Karachi</td><td class="num">Rs 18,300</td><td>Feb 14, 2026</td></tr>
+            <tr><td>Al-Karam Traders</td><td>0321-7789001</td><td>Bolton Market, Karachi</td><td class="num">Rs 4,500</td><td>May 2, 2026</td></tr>
+          </table></div>
+          <div class="foot-note"><i></i>Suppliers added here appear immediately in the Purchases screen.</div>
+        </div>
+      </div>
+
+      <div class="subscreen" id="m-roles">
+        <div class="toolbar"><button class="btn primary">+ New role</button></div>
+        <div class="card" style="margin-bottom:12px">
+          <div style="display:flex; justify-content:space-between; align-items:center">
+            <strong>Admin</strong><span class="pill good">Fixed — full access</span>
+          </div>
+          <p style="color:var(--muted); font-size:12px; margin:6px 0 0">Cannot be edited. Every module, every action, always.</p>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div style="display:flex; justify-content:space-between; align-items:center">
+            <strong>Cashier</strong><button class="btn" style="padding:4px 10px; font-size:12px">Edit</button>
+          </div>
+          <div class="perm">
+            <label><input type="checkbox" checked disabled>View dashboard</label>
+            <label><input type="checkbox" checked disabled>Record sales</label>
+            <label><input type="checkbox" disabled>Manage inventory</label>
+            <label><input type="checkbox" disabled>Record purchases</label>
+            <label><input type="checkbox" disabled>View reports</label>
+            <label><input type="checkbox" disabled>Add expenses</label>
+          </div>
+        </div>
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center">
+            <strong>Stock manager</strong><button class="btn" style="padding:4px 10px; font-size:12px">Edit</button>
+          </div>
+          <div class="perm">
+            <label><input type="checkbox" checked disabled>View dashboard</label>
+            <label><input type="checkbox" disabled>Record sales</label>
+            <label><input type="checkbox" checked disabled>Manage inventory</label>
+            <label><input type="checkbox" checked disabled>Record purchases</label>
+            <label><input type="checkbox" disabled>View reports</label>
+            <label><input type="checkbox" disabled>Add expenses</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="s-settings">
+      <div class="settingswrap">
+        <div class="card">
+          <p class="sectitle">Company master</p>
+          <div class="field"><label>Business name</label><input id="settingsShopNameInput" value="Rafiq Sanitary Traders"></div>
+          <div class="field"><label>Address</label><input id="settingsAddressInput" value="Shop 14, Sadar Market, Karachi"></div>
+          <div class="field"><label>Logo</label><input type="text" value="logo.png (uploaded)" readonly></div>
+        </div>
+        <div class="card">
+          <p class="sectitle">App settings</p>
+          <div class="rowline">Google Sign-In<div class="switch on"><i></i></div></div>
+          <div class="rowline">Dark mode default<div class="switch"><i></i></div></div>
+          <div class="rowline">Show subcategories<div class="switch on"><i></i></div></div>
+          <div class="rowline">Print receipt after sale<div class="switch on"><i></i></div></div>
+          <div class="rowline">Accept online payments<div class="switch on"><i></i></div></div>
+          <div class="rowline">Accept card payments<div class="switch on" id="cardPaymentToggle"><i></i></div></div>
+          <div class="field" style="margin-top:12px"><label>Google OAuth Client ID</label><input value="•••••••••••.apps.googleusercontent.com"></div>
+          <button class="btn" style="margin-top:8px">Seed sample data</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modalAddProduct" style="display:none; max-height:88vh; overflow-y:auto">
+    <div class="modal-head"><h3>Add product</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="field-row">
+      <div class="field"><label>Product name</label><input value="Ceramic Floor Tile"></div>
+      <div class="field"><label>SKU</label><input value="TIL-3305"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Category</label><select><option>Sanitary ware</option><option>Fittings</option><option>Other</option></select></div>
+      <div class="field"><label>Warranty</label>
+        <div style="display:flex; gap:6px">
+          <input type="number" value="2" style="flex:1">
+          <select style="flex:1"><option>Months</option><option selected>Years</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Cost price</label><input type="number" value="180"></div>
+      <div class="field"><label>Selling price</label><input type="number" value="320"></div>
+      <div class="field"><label>Opening stock</label><input type="number" value="140"></div>
+    </div>
+
+    <label style="font-size:12px; color:var(--muted); display:block; margin:4px 0 6px">Variants (size / colour)</label>
+    <div class="variantrow" style="font-size:11px; color:var(--muted)"><span>Size</span><span>Colour</span><span>Stock</span><span></span></div>
+    <div class="variantrow"><input value="600x600mm"><input value="Beige"><input type="number" value="60"><button class="btn" style="padding:4px 8px; font-size:12px">×</button></div>
+    <div class="variantrow"><input value="600x600mm"><input value="Grey"><input type="number" value="50"><button class="btn" style="padding:4px 8px; font-size:12px">×</button></div>
+    <div class="variantrow"><input value="800x800mm"><input value="Beige"><input type="number" value="30"><button class="btn" style="padding:4px 8px; font-size:12px">×</button></div>
+    <button class="btn" style="margin:4px 0 14px">+ Add variant</button>
+
+    <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px">Product images (up to 3)</label>
+    <div class="imgrow">
+      <div class="imgslot">+ Photo 1</div>
+      <div class="imgslot">+ Photo 2</div>
+      <div class="imgslot">+ Photo 3</div>
+    </div>
+    <div class="modal-foot"><button class="btn" data-close>Cancel</button><button class="btn primary" data-close>Save product</button></div>
+  </div>
+
+  <div class="modal" id="modalRecordPurchase" style="display:none">
+    <div class="modal-head"><h3>Record purchase</h3><button class="modal-close" data-close>&times;</button></div>
+    <div class="field-row">
+      <div class="field"><label>Supplier</label><select><option>Rafiq Sanitary Supplies</option><option>Al-Karam Traders</option></select></div>
+      <div class="field"><label>Invoice #</label><input value="INV-7802"></div>
+      <div class="field"><label>Date</label><input type="date" value="2026-07-21"></div>
+    </div>
+    <label style="font-size:12px; color:var(--muted); display:block; margin:4px 0 6px">Line items</label>
+    <div class="linerow" style="font-size:11px; color:var(--muted)"><span>Product</span><span>Qty</span><span>Unit cost</span><span>Subtotal</span><span></span></div>
+    <div class="linerow"><input value="Commode — Ivory 1pc"><input type="number" value="10"><input type="number" value="4200"><input value="42,000" readonly><button class="btn" style="padding:4px 8px; font-size:12px">×</button></div>
+    <div class="linerow"><input value="Basin Mixer Tap"><input type="number" value="6"><input type="number" value="1850"><input value="11,100" readonly><button class="btn" style="padding:4px 8px; font-size:12px">×</button></div>
+    <button class="btn" style="margin:4px 0 14px">+ Add line item</button>
+    <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:6px">Attach invoice</label>
+    <div class="attach-tabs">
+      <button class="tab2 on">Upload file</button>
+      <button class="tab2">Camera</button>
+      <button class="tab2">Cloud URL</button>
+    </div>
+    <input class="input" style="width:100%" placeholder="No file selected">
+    <div class="modal-foot"><span class="num" style="margin-right:auto; font-weight:600">Total: Rs 53,100</span><button class="btn" data-close>Cancel</button><button class="btn primary" data-close>Save purchase</button></div>
+  </div>
+
+  <div class="modal" id="modalReceipt" style="display:none">
+    <div class="modal-head">
+      <div>
+        <h3 style="margin-bottom:2px" id="receiptShopName">Rafiq Sanitary Traders</h3>
+        <p style="font-size:11px; color:var(--muted); margin:0" id="receiptShopAddress">Shop 14, Sadar Market, Karachi</p>
+      </div>
+      <button class="modal-close" data-close aria-label="Back to cart, nothing is lost">&times;</button>
+    </div>
+    <p style="font-size:12px; color:var(--muted); margin:0 0 14px">
+      Receipt <strong id="receiptTitle">26-07-27--001</strong> · <span id="receiptDateTime">Jul 27, 2026, 11:42 AM</span> · Cashier: Sana Malik
+    </p>
+    <p style="font-size:13px; margin:0 0 10px"><strong>Customer:</strong> <span id="receiptCustomer">Walk-in Customer</span> &nbsp;·&nbsp; <strong>Payment:</strong> <span id="receiptPayment">Cash</span></p>
+    <div id="receiptLines">
+      <div class="receipt-line"><span>Commode — Ivory 1pc × 1 <span style="color:var(--muted)">(1 yr warranty)</span></span><span class="num">Rs 6,500</span></div>
+    </div>
+    <div class="receipt-line" style="border-bottom:none; font-weight:700; padding-top:8px"><span>Total</span><span class="num" id="receiptTotal">Rs 9,800</span></div>
+    <div class="foot-note" style="margin-top:12px"><i></i>This is a preview — nothing is recorded yet. Save as draft to finish later, or complete the sale below.</div>
+    <div class="modal-foot">
+      <button class="btn" data-close>Back to cart</button>
+      <button class="btn" id="posSaveDraftBtn">Save as draft</button>
+      <button class="btn" id="posPrintBtn">Print preview</button>
+      <button class="btn primary" id="posCompleteSaleBtn">Complete sale</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="saroot" id="superAdminRoot" style="display:none">
+  <div class="topbar2">
+    <div>
+      <div class="brand2">Dukandar<span>SUPER ADMIN</span></div>
+      <div class="sub2">admin.dukandar.app — visible only to the app owner, never to shop users</div>
+    </div>
+    <button class="link" id="toShopAppLink" style="color:#7FE0BE; background:none; border:none; cursor:pointer; text-decoration:underline; font-size:12px">← Back to shop app view</button>
+  </div>
+  <div class="satabs">
+    <button class="satab on" data-sasub="overview">Overview</button>
+    <button class="satab" data-sasub="stores">Stores</button>
+    <button class="satab" data-sasub="users">Users</button>
+  </div>
+  <div class="samain">
+
+    <div class="subscreen active" id="sa-overview">
+      <div class="grid g3" style="margin-bottom:16px">
+        <div class="card kpi"><div class="label">Total stores</div><div class="value">18</div><div class="delta up">▲ 3 this month</div></div>
+        <div class="card kpi"><div class="label">Total users</div><div class="value">47</div><div class="delta">across all stores</div></div>
+        <div class="card kpi"><div class="label">Active today</div><div class="value">11 stores</div></div>
+      </div>
+      <div class="card">
+        <p class="sectitle">Newest stores</p>
+        <div class="table-wrap"><table>
+          <tr><th>Store</th><th>Owner</th><th class="num">Users</th><th>Created</th></tr>
+          <tr><td>Rafiq Sanitary Traders</td><td>owner@rafiqtraders.pk</td><td class="num">3</td><td>Jan 3, 2026</td></tr>
+          <tr><td>Al-Madina Hardware</td><td>faisal@almadina.pk</td><td class="num">5</td><td>Feb 18, 2026</td></tr>
+          <tr><td>City Sanitary House</td><td>owner@citysanitary.pk</td><td class="num">2</td><td>Jun 30, 2026</td></tr>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="subscreen" id="sa-stores">
+      <div class="toolbar"><input class="input" placeholder="Search stores" style="flex:1"></div>
+      <div class="card">
+        <div class="table-wrap"><table>
+          <tr><th>Store</th><th>Owner email</th><th class="num">Users</th><th>Created</th><th>Status</th></tr>
+          <tr class="clickrow" data-sastore="Rafiq Sanitary Traders"><td>Rafiq Sanitary Traders</td><td>owner@rafiqtraders.pk</td><td class="num">3</td><td>Jan 3, 2026</td><td><span class="pill good">Active</span></td></tr>
+          <tr class="clickrow" data-sastore="Al-Madina Hardware"><td>Al-Madina Hardware</td><td>faisal@almadina.pk</td><td class="num">5</td><td>Feb 18, 2026</td><td><span class="pill good">Active</span></td></tr>
+          <tr class="clickrow" data-sastore="City Sanitary House"><td>City Sanitary House</td><td>owner@citysanitary.pk</td><td class="num">2</td><td>Jun 30, 2026</td><td><span class="pill good">Active</span></td></tr>
+          <tr class="clickrow" data-sastore="Malik Traders"><td>Malik Traders</td><td>malik@traders.pk</td><td class="num">1</td><td>Jul 10, 2026</td><td><span class="pill warn">No activity yet</span></td></tr>
+        </table></div>
+        <div class="foot-note"><i></i>Click a store to view its users.</div>
+      </div>
+    </div>
+
+    <div class="subscreen" id="sa-users">
+      <div class="toolbar">
+        <input class="input" placeholder="Search users" style="flex:1">
+        <select class="input" id="saStoreFilter"><option>All stores</option><option>Rafiq Sanitary Traders</option><option>Al-Madina Hardware</option><option>City Sanitary House</option><option>Malik Traders</option></select>
+      </div>
+      <div class="card">
+        <div class="table-wrap"><table>
+          <tr><th>Name</th><th>Email</th><th>Store</th><th>Access</th><th>Status</th><th></th></tr>
+          <tr data-store="Rafiq Sanitary Traders"><td>Waseem Akhtar</td><td>owner@rafiqtraders.pk</td><td>Rafiq Sanitary Traders</td><td><span class="pill good">Admin</span></td><td><span class="pill good">Active</span></td><td><button class="btn" style="padding:4px 10px; font-size:12px" onclick="openModal('modalResetPassword')">Reset password</button></td></tr>
+          <tr data-store="Rafiq Sanitary Traders"><td>Sana Malik</td><td>sana@rafiqtraders.pk</td><td>Rafiq Sanitary Traders</td><td><span class="pill neutral">Employee</span></td><td><span class="pill good">Active</span></td><td><button class="btn" style="padding:4px 10px; font-size:12px" onclick="openModal('modalResetPassword')">Reset password</button></td></tr>
+          <tr data-store="Al-Madina Hardware"><td>Faisal Rana</td><td>faisal@almadina.pk</td><td>Al-Madina Hardware</td><td><span class="pill good">Admin</span></td><td><span class="pill good">Active</span></td><td><button class="btn" style="padding:4px 10px; font-size:12px" onclick="openModal('modalResetPassword')">Reset password</button></td></tr>
+          <tr data-store="City Sanitary House"><td>Owner</td><td>owner@citysanitary.pk</td><td>City Sanitary House</td><td><span class="pill good">Admin</span></td><td><span class="pill warn">Locked out</span></td><td><button class="btn primary" style="padding:4px 10px; font-size:12px" onclick="openModal('modalResetPassword')">Reset password</button></td></tr>
+        </table></div>
+        <div class="foot-note"><i></i>Only the Super Admin can reset a user's password from here — shop Admins cannot reset each other's passwords.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="saOverlay">
+    <div class="modal" id="modalResetPassword" style="display:none">
+      <div class="modal-head"><h3>Reset password</h3><button class="modal-close" data-close>&times;</button></div>
+      <p style="font-size:13px; color:var(--muted); margin:-6px 0 14px">owner@citysanitary.pk · City Sanitary House</p>
+      <div class="field"><label>New temporary password</label><input value="Temp#48213"></div>
+      <p style="font-size:11px; color:var(--muted)">Or send a reset link to their email instead:</p>
+      <button class="btn" style="width:100%; margin-bottom:12px">Send password reset email</button>
+      <div class="modal-foot"><button class="btn" data-close>Cancel</button><button class="btn primary" data-close>Set new password</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const titles={dash:"Dashboard",pos:"POS",inv:"Inventory",purch:"Purchases",reports:"Reports",master:"Master",settings:"Settings",expense:"Expense"};
+const shell=document.getElementById('shell');
+
+function showScreen(s){
+  document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));
+  const navBtn=document.querySelector('.navbtn[data-s="'+s+'"]');
+  if(navBtn) navBtn.classList.add('active');
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  document.getElementById('s-'+s).classList.add('active');
+  document.getElementById('title').textContent=titles[s]||s;
+}
+document.querySelectorAll('.navbtn').forEach(b=>{
+  b.addEventListener('click',()=>showScreen(b.dataset.s));
+});
+
+function logIn(){
+  shell.classList.remove('loggedout');
+  showScreen('dash');
+}
+function logOut(){
+  shell.classList.add('loggedout');
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  document.getElementById('s-auth').classList.add('active');
+  document.getElementById('title').textContent='Sign in';
+}
+document.getElementById('signInBtn').addEventListener('click',logIn);
+document.getElementById('googleSignInBtn').addEventListener('click',logIn);
+document.getElementById('signOutBtn').addEventListener('click',logOut);
+
+document.querySelectorAll('.tab2msub').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.tab2msub').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    document.querySelectorAll('#s-master .subscreen').forEach(x=>x.classList.remove('active'));
+    document.getElementById('m-'+b.dataset.sub).classList.add('active');
+  });
+});
+
+function showReportSub(sub){
+  document.querySelectorAll('.tab2rsub').forEach(x=>x.classList.toggle('on', x.dataset.repsub===sub));
+  document.querySelectorAll('#s-reports .subscreen').forEach(x=>x.classList.remove('active'));
+  document.getElementById('r-'+sub).classList.add('active');
+}
+document.querySelectorAll('.tab2rsub').forEach(b=>{
+  b.addEventListener('click',()=>showReportSub(b.dataset.repsub));
+});
+
+const overlay=document.getElementById('overlay');
+function openModal(id){
+  const modal=document.getElementById(id);
+  const parentOverlay=modal.closest('.overlay');
+  document.querySelectorAll('.overlay .modal').forEach(m=>m.style.display='none');
+  modal.style.display='block';
+  parentOverlay.classList.add('open');
+}
+function closeAllModals(){
+  document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('open'));
+}
+document.querySelectorAll('.overlay').forEach(ov=>{
+  ov.addEventListener('click',(e)=>{ if(e.target===ov) closeAllModals(); });
+  ov.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeAllModals));
+});
+document.getElementById('openAddProduct').addEventListener('click',()=>openModal('modalAddProduct'));
+document.getElementById('openRecordPurchase').addEventListener('click',()=>openModal('modalRecordPurchase'));
+
+// ---------- Dashboard: recent transactions (25 total, 5 visible, scroll for rest) ----------
+const DASH_CUSTOMERS=["Walk-in Customer","Ali Hardware","Walk-in Customer","Sana Traders","Walk-in Customer","Malik Sons"];
+const DASH_TX=Array.from({length:25},(_,i)=>{
+  const hour=11-Math.floor(i/4), min=(59-(i*7)%60);
+  const amount=[3450,18900,650,7200,1200,24500,980,15300][i%8];
+  return {
+    time:String(((hour+11)%12)+1).padStart(2,'0')+':'+String(min).padStart(2,'0')+' '+(hour>=12?'PM':'AM'),
+    customer:DASH_CUSTOMERS[i%DASH_CUSTOMERS.length],
+    items:1+(i%6),
+    amount,
+    status: i%9===0 ? 'Refunded' : 'Paid',
+    receipt: '26-07-'+String(20-Math.floor(i/6)).padStart(2,'0')+'--'+String(25-i).padStart(3,'0')
+  };
+});
+function renderDashRecent(){
+  const body=document.getElementById('dashRecentBody');
+  body.innerHTML='';
+  DASH_TX.forEach(tx=>{
+    const tr=document.createElement('tr');
+    tr.className='clickrow';
+    tr.dataset.receipt=tx.receipt;
+    tr.innerHTML='<td>'+tx.time+'</td><td>'+tx.customer+'</td><td>'+tx.items+'</td><td class="num">Rs '+tx.amount.toLocaleString()+'</td>'+
+      '<td><span class="pill '+(tx.status==='Paid'?'good':'warn')+'">'+tx.status+'</span></td>';
+    tr.addEventListener('click',()=>{
+      document.getElementById('receiptTitle').textContent=tx.receipt;
+      openModal('modalReceipt');
+    });
+    body.appendChild(tr);
+  });
+}
+renderDashRecent();
+
+document.querySelectorAll('#s-dash [data-goto]').forEach(el=>{
+  el.addEventListener('click',()=>{
+    showScreen(el.dataset.goto);
+    if(el.dataset.repsub) showReportSub(el.dataset.repsub);
+    if(el.dataset.mastersub){
+      document.querySelectorAll('.tab2msub').forEach(x=>x.classList.toggle('on', x.dataset.sub===el.dataset.mastersub));
+      document.querySelectorAll('#s-master .subscreen').forEach(x=>x.classList.remove('active'));
+      document.getElementById('m-'+el.dataset.mastersub).classList.add('active');
+    }
+    if(el.dataset.invfilter){
+      document.getElementById('invCategoryFilter').value=el.dataset.invfilter==='Other' ? 'Other' : el.dataset.invfilter;
+    }
+  });
+});
+
+function sortTable(table, th){
+  const idx=Array.from(th.parentNode.children).indexOf(th);
+  const type=th.dataset.type;
+  const rows=Array.from(table.querySelectorAll('tr')).slice(1);
+  const asc = !(th.classList.contains('sorted') && th.dataset.dir==='asc');
+  th.parentNode.querySelectorAll('th').forEach(x=>{x.classList.remove('sorted'); delete x.dataset.dir;});
+  th.classList.add('sorted');
+  th.dataset.dir = asc ? 'asc' : 'desc';
+  rows.sort((a,b)=>{
+    let av=a.children[idx].textContent.trim();
+    let bv=b.children[idx].textContent.trim();
+    if(type==='num'){
+      av=parseFloat(av.replace(/[^0-9.\-]/g,''))||0;
+      bv=parseFloat(bv.replace(/[^0-9.\-]/g,''))||0;
+      return asc ? av-bv : bv-av;
+    }
+    return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+  });
+  rows.forEach(r=>table.appendChild(r));
+}
+document.querySelectorAll('.sortable-table th.sortable').forEach(th=>{
+  th.addEventListener('click',()=>sortTable(th.closest('table'), th));
+});
+
+document.getElementById('themeToggle').addEventListener('click',()=>{
+  const r=document.documentElement;
+  r.setAttribute('data-theme', r.getAttribute('data-theme')==='dark' ? 'light':'dark');
+});
+
+// Shop name in sidebar follows Settings > Business name
+document.getElementById('settingsShopNameInput').addEventListener('input',(e)=>{
+  document.getElementById('shopNameLabel').textContent=e.target.value || 'Your shop';
+});
+
+// Card payment toggle (Settings) controls POS payment option visibility
+document.getElementById('cardPaymentToggle').addEventListener('click',(e)=>{
+  const btn=e.currentTarget;
+  btn.classList.toggle('on');
+  document.getElementById('posCardOption').style.display = btn.classList.contains('on') ? '' : 'none';
+});
+
+// ---------- POS ----------
+const POS_PRODUCTS=[
+  {name:"Commode — Ivory 1pc", sku:"SAN-1042", price:6500, warranty:"1 yr"},
+  {name:"Basin Mixer Tap", sku:"FIT-2210", price:2950, warranty:"6 mo"},
+  {name:"Ceramic Floor Tile", sku:"TIL-3305", price:320, warranty:"2 yr"},
+  {name:"Shower Head — Rain", sku:"SAN-1180", price:1800, warranty:"3 mo"},
+  {name:"PVC Pipe 4\" (20ft)", sku:"PLM-0087", price:1450, warranty:"—"},
+  {name:"Angle Valve — Brass", sku:"FIT-2311", price:750, warranty:"—"},
+];
+let posCart=[];
+
+function renderPosCatalog(filter){
+  const wrap=document.getElementById('posCatalog');
+  wrap.innerHTML='';
+  POS_PRODUCTS.filter(p=>!filter || p.name.toLowerCase().includes(filter.toLowerCase()) || p.sku.toLowerCase().includes(filter.toLowerCase())).forEach(p=>{
+    const el=document.createElement('button');
+    el.className='posproduct';
+    el.innerHTML='<div class="pname">'+p.name+'</div><div class="pmeta">'+p.sku+'</div><div class="pprice">Rs '+p.price.toLocaleString()+'</div>';
+    el.addEventListener('click',()=>addToCart(p));
+    wrap.appendChild(el);
+  });
+}
+function addToCart(p){
+  const existing=posCart.find(l=>l.sku===p.sku);
+  if(existing){ existing.qty+=1; } else { posCart.push({name:p.name, sku:p.sku, qty:1, price:p.price, warranty:p.warranty}); }
+  renderCart();
+}
+function renderCart(){
+  const wrap=document.getElementById('posCartRows');
+  const empty=document.getElementById('posCartEmpty');
+  const header=document.getElementById('posCartHeader');
+  wrap.innerHTML='';
+  const hasItems=posCart.length>0;
+  empty.style.display = hasItems ? 'none' : 'block';
+  header.style.display = hasItems ? 'grid' : 'none';
+  posCart.forEach((l,i)=>{
+    const row=document.createElement('div');
+    row.className='cartrow';
+    row.innerHTML='<span>'+l.name+'</span>'+
+      '<input type="number" min="1" value="'+l.qty+'" data-i="'+i+'" data-f="qty">'+
+      '<input type="number" value="'+l.price+'" data-i="'+i+'" data-f="price">'+
+      '<input type="text" value="'+l.warranty+'" data-i="'+i+'" data-f="warranty" title="Warranty — from Inventory, editable per sale">'+
+      '<span class="num">'+(l.qty*l.price).toLocaleString()+'</span>'+
+      '<button class="btn" style="padding:3px 7px; font-size:11px" data-remove="'+i+'">×</button>';
+    wrap.appendChild(row);
+  });
+  wrap.querySelectorAll('input[type="number"]').forEach(inp=>{
+    inp.addEventListener('input',(e)=>{
+      const i=+e.target.dataset.i, f=e.target.dataset.f;
+      posCart[i][f]=Math.max(f==='qty'?1:0, +e.target.value||0);
+      renderCart();
+    });
+  });
+  wrap.querySelectorAll('input[data-f="warranty"]').forEach(inp=>{
+    inp.addEventListener('input',(e)=>{
+      posCart[+e.target.dataset.i].warranty=e.target.value;
+    });
+  });
+  wrap.querySelectorAll('[data-remove]').forEach(b=>{
+    b.addEventListener('click',()=>{ posCart.splice(+b.dataset.remove,1); renderCart(); });
+  });
+  const subtotal=posCart.reduce((s,l)=>s+l.qty*l.price,0);
+  document.getElementById('posSubtotal').textContent='Rs '+subtotal.toLocaleString();
+  document.getElementById('posTotal').textContent='Rs '+subtotal.toLocaleString();
+}
+document.getElementById('posSearch').addEventListener('input',(e)=>renderPosCatalog(e.target.value));
+renderPosCatalog('');
+renderCart();
+
+let posPayment='Cash';
+document.querySelectorAll('.paymethod').forEach(b=>{
+  b.addEventListener('click',()=>{
+    if(b.style.display==='none') return;
+    document.querySelectorAll('.paymethod').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    posPayment=b.dataset.pay;
+  });
+});
+
+// Receipt numbering: yy-mm-dd--NNN, resets to 001 each new day.
+let dailyReceiptSeq=0;
+let lastReceiptDateKey='';
+function todayDateKey(d){
+  const y=String(d.getFullYear()).slice(-2), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
+function peekNextReceiptNo(){
+  const key=todayDateKey(new Date());
+  const seq = (key===lastReceiptDateKey) ? dailyReceiptSeq+1 : 1;
+  return key+'--'+String(seq).padStart(3,'0');
+}
+function commitReceiptNo(){
+  const key=todayDateKey(new Date());
+  if(key!==lastReceiptDateKey){ lastReceiptDateKey=key; dailyReceiptSeq=0; }
+  dailyReceiptSeq+=1;
+  return key+'--'+String(dailyReceiptSeq).padStart(3,'0');
+}
+
+function buildReceiptPreview(){
+  const customerInput=document.getElementById('posCustomer');
+  const customerName=customerInput.value.trim() || 'Walk-in Customer';
+  const now=new Date();
+  document.getElementById('receiptShopName').textContent=document.getElementById('shopNameLabel').textContent;
+  document.getElementById('receiptShopAddress').textContent=document.getElementById('settingsAddressInput').value;
+  document.getElementById('receiptTitle').textContent=peekNextReceiptNo()+' (preview)';
+  document.getElementById('receiptDateTime').textContent=now.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'2-digit'})+', '+now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  document.getElementById('receiptCustomer').textContent=customerName;
+  document.getElementById('receiptPayment').textContent=posPayment;
+  const linesWrap=document.getElementById('receiptLines');
+  linesWrap.innerHTML='';
+  let total=0;
+  posCart.forEach(l=>{
+    total+=l.qty*l.price;
+    const d=document.createElement('div');
+    d.className='receipt-line';
+    const warrantyNote = l.warranty && l.warranty!=='—' ? ' <span style="color:var(--muted)">('+l.warranty+' warranty)</span>' : '';
+    d.innerHTML='<span>'+l.name+' × '+l.qty+warrantyNote+'</span><span class="num">Rs '+(l.qty*l.price).toLocaleString()+'</span>';
+    linesWrap.appendChild(d);
+  });
+  document.getElementById('receiptTotal').textContent='Rs '+total.toLocaleString();
+}
+
+document.getElementById('posCheckoutBtn').addEventListener('click',()=>{
+  if(posCart.length===0){ alert('Add at least one product to the cart first.'); return; }
+  buildReceiptPreview();
+  openModal('modalReceipt');
+  // Preview only — cart is untouched until Complete sale or Save as draft is clicked.
+});
+
+document.getElementById('posPrintBtn').addEventListener('click',()=>{
+  window.print();
+});
+
+document.getElementById('posSaveDraftBtn').addEventListener('click',()=>{
+  closeAllModals();
+  alert('Saved as a draft sale — resume it later from POS without losing these items or prices.');
+  posCart=[];
+  document.getElementById('posCustomer').value='';
+  renderCart();
+});
+
+document.getElementById('posCompleteSaleBtn').addEventListener('click',()=>{
+  const finalReceiptNo=commitReceiptNo();
+  document.getElementById('receiptTitle').textContent=finalReceiptNo;
+  alert('Sale '+finalReceiptNo+' recorded.');
+  closeAllModals();
+  // Sale is now recorded. Cart clears only at this point, not on preview-close.
+  posCart=[];
+  document.getElementById('posCustomer').value='';
+  renderCart();
+});
+
+// ---------- Super Admin view toggle ----------
+const shopAppRoot=document.getElementById('shopAppRoot');
+const superAdminRoot=document.getElementById('superAdminRoot');
+document.getElementById('toSuperAdminLink').addEventListener('click',()=>{
+  shopAppRoot.style.display='none';
+  superAdminRoot.style.display='block';
+});
+document.getElementById('toShopAppLink').addEventListener('click',()=>{
+  superAdminRoot.style.display='none';
+  shopAppRoot.style.display='block';
+});
+document.querySelectorAll('.satab').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.satab').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    document.querySelectorAll('.saroot .subscreen').forEach(x=>x.classList.remove('active'));
+    document.getElementById('sa-'+b.dataset.sasub).classList.add('active');
+  });
+});
+document.querySelectorAll('#sa-stores [data-sastore]').forEach(row=>{
+  row.addEventListener('click',()=>{
+    document.querySelectorAll('.satab').forEach(x=>x.classList.toggle('on', x.dataset.sasub==='users'));
+    document.querySelectorAll('.saroot .subscreen').forEach(x=>x.classList.remove('active'));
+    document.getElementById('sa-users').classList.add('active');
+    document.getElementById('saStoreFilter').value=row.dataset.sastore;
+    document.querySelectorAll('#sa-users tr[data-store]').forEach(r=>{
+      r.style.display = r.dataset.store===row.dataset.sastore ? '' : 'none';
+    });
+  });
+});
+document.getElementById('saStoreFilter').addEventListener('change',(e)=>{
+  const v=e.target.value;
+  document.querySelectorAll('#sa-users tr[data-store]').forEach(r=>{
+    r.style.display = (v==='All stores' || r.dataset.store===v) ? '' : 'none';
+  });
+});
+
+// ---------- Mobile preview toggle ----------
+document.querySelectorAll('#viewportSegs button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('#viewportSegs button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    shopAppRoot.classList.toggle('force-mobile', b.dataset.mode==='mobile');
+  });
+});
+
+document.getElementById('viewChangelogLink').addEventListener('click',(e)=>{
+  e.preventDefault();
+  alert('See the separate v1_to_v2_changes.md document for the full written changelog.');
+});
+</script>

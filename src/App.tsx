@@ -1,20 +1,24 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate, NavLink, useLocation } from "react-router-dom";
 import { isFirebaseConfigured } from "./firebase/config";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { usePermissions } from "./lib/permissions";
+import { useShopDoc } from "./lib/firestore";
 import AuthScreen from "./views/AuthScreen";
 import ShopSetupScreen from "./views/ShopSetupScreen";
 import DashboardScreen from "./views/DashboardScreen";
+import PosScreen from "./views/PosScreen";
 import InventoryScreen from "./views/InventoryScreen";
 import PurchaseScreen from "./views/PurchaseScreen";
 import ExpenseScreen from "./views/ExpenseScreen";
 import ReportsScreen from "./views/ReportsScreen";
 import MasterScreen from "./views/MasterScreen";
 import SettingsScreen from "./views/SettingsScreen";
+import SuperAdminScreen from "./views/SuperAdminScreen";
 
 const TITLES: Record<string, string> = {
   "/": "Dashboard",
+  "/pos": "POS",
   "/inventory": "Inventory",
   "/purchases": "Purchases",
   "/expense": "Expense",
@@ -26,25 +30,13 @@ const TITLES: Record<string, string> = {
 function Shell() {
   const { profile, signOut } = useAuth();
   const { permissions, isAdmin } = usePermissions();
+  const { shop } = useShopDoc();
   const location = useLocation();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark" | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const title = TITLES[location.pathname] || "Dukandar";
   const canSeePurchases = isAdmin || permissions.recordPurchases;
   const canSeeMaster = isAdmin;
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    function handleClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [menuOpen]);
 
   function toggleTheme() {
     const next = theme === "dark" ? "light" : "dark";
@@ -57,10 +49,13 @@ function Shell() {
       <div className="rail">
         <div className="brand">
           Dukandar
-          <span>Shop &amp; inventory</span>
+          <span className="shopname">{shop?.businessName || "Your shop"}</span>
         </div>
         <NavLink to="/" end className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
           <span className="dot" />Dashboard
+        </NavLink>
+        <NavLink to="/pos" className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
+          <span className="dot" />POS
         </NavLink>
         <NavLink to="/inventory" className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
           <span className="dot" />Inventory
@@ -85,29 +80,17 @@ function Shell() {
           <span className="dot" />Settings
         </NavLink>
         <div className="railfoot">
-          Cloud-first · Firebase
-          <br />
-          {profile?.email}
+          <span>{profile?.email}</span>
+          <button className="btn signoutbtn" onClick={() => signOut()}>
+            &#8618; Sign out
+          </button>
         </div>
       </div>
       <div className="main">
         <div className="topbar">
           <h1>{title}</h1>
-          <div style={{ display: "flex", gap: 10, alignItems: "center", position: "relative" }} ref={menuRef}>
+          <div style={{ display: "flex", gap: 10, alignItems: "center", position: "relative" }}>
             <span className="pill neutral">{profile?.access === "Admin" ? "Admin" : profile?.access}</span>
-            <button className="iconbtn" onClick={() => setMenuOpen((v) => !v)} aria-label="More">
-              &#9776;
-            </button>
-            <div className={"dropdown" + (menuOpen ? " open" : "")}>
-              <button
-                onClick={async () => {
-                  setMenuOpen(false);
-                  await signOut();
-                }}
-              >
-                &#8618; Sign out
-              </button>
-            </div>
             <button className="themebtn" onClick={toggleTheme}>
               Toggle theme
             </button>
@@ -116,6 +99,7 @@ function Shell() {
 
         <Routes>
           <Route path="/" element={<DashboardScreen />} />
+          <Route path="/pos" element={<PosScreen />} />
           <Route path="/inventory" element={<InventoryScreen />} />
           <Route path="/purchases" element={canSeePurchases ? <PurchaseScreen /> : <Navigate to="/" replace />} />
           <Route path="/expense" element={<ExpenseScreen />} />
@@ -131,6 +115,7 @@ function Shell() {
 
 function AppInner() {
   const { firebaseUser, loading, needsShopSetup } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -150,6 +135,10 @@ function AppInner() {
         </div>
       </div>
     );
+  }
+
+  if (location.pathname.startsWith("/superadmin")) {
+    return <SuperAdminScreen />;
   }
 
   if (needsShopSetup) {

@@ -65,7 +65,7 @@ export default function DashboardScreen() {
     return entries.map(([name, value]) => ({ name, pct: Math.round((value / grand) * 100) }));
   }, [products]);
 
-  const recent = sales.slice(0, 5);
+  const recent = sales.slice(0, 25);
   const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const colors = ["var(--accent)", "var(--warm)", "var(--line)"];
 
@@ -148,32 +148,36 @@ export default function DashboardScreen() {
         {recent.length === 0 ? (
           <p style={{ fontSize: 12, color: "var(--muted)" }}>No sales recorded yet.</p>
         ) : (
-          <table>
-            <tbody>
-              <tr>
-                <th>Time</th>
-                <th>Customer</th>
-                <th>Items</th>
-                <th className="num">Amount</th>
-                <th>Status</th>
-              </tr>
-              {recent.map((s) => (
-                <tr key={s.id} className="clickrow" onClick={() => setOpenReceipt(s)}>
-                  <td>{new Date(s.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</td>
-                  <td>{s.customer}</td>
-                  <td>{s.items.reduce((n, it) => n + it.qty, 0)}</td>
-                  <td className="num">{money(s.amount)}</td>
-                  <td>
-                    <span className={"pill " + (s.status === "Paid" ? "good" : "warn")}>{s.status}</span>
-                  </td>
+          <div className="table-wrap scroll5">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th className="num">Amount</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {recent.map((s) => (
+                  <tr key={s.id} className="clickrow" onClick={() => setOpenReceipt(s)}>
+                    <td>{new Date(s.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</td>
+                    <td>{s.customer}</td>
+                    <td>{s.items.reduce((n, it) => n + it.qty, 0)}</td>
+                    <td className="num">{money(s.amount)}</td>
+                    <td>
+                      <span className={"pill " + (s.status === "Paid" ? "good" : "warn")}>{s.status}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
         <div className="foot-note">
-          <i /> Click a row to open the original receipt. Every row stores a full created-at timestamp internally,
-          even where the screen only shows the time.
+          <i /> Showing the last {recent.length} transactions, 5 at a time — scroll for more. Click a row to open
+          the original receipt.
         </div>
       </div>
 

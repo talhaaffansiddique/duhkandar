@@ -46,7 +46,12 @@ export interface Shop {
   darkModeDefault?: boolean;
   showSubcategories?: boolean;
   printReceiptAfterSale?: boolean;
+  acceptOnlinePayments?: boolean;
+  acceptCardPayments?: boolean;
   seeded?: boolean;
+  /** Daily receipt counter, e.g. "26-07-27", reset each new calendar day. */
+  lastReceiptDateKey?: string;
+  lastReceiptSeq?: number;
 }
 
 export interface Supplier extends AuditFields {
@@ -57,6 +62,14 @@ export interface Supplier extends AuditFields {
   outstanding: number;
 }
 
+export type WarrantyUnit = "Months" | "Years";
+
+export interface ProductVariant {
+  size: string;
+  colour: string;
+  stock: number;
+}
+
 export interface Product extends AuditFields {
   id: string;
   name: string;
@@ -65,8 +78,10 @@ export interface Product extends AuditFields {
   stock: number;
   avgCost: number;
   price: number;
-  warrantyMonths: number;
+  warrantyValue: number;
+  warrantyUnit: WarrantyUnit;
   images: string[];
+  variants?: ProductVariant[];
 }
 
 export interface PurchaseLineItem {
@@ -93,7 +108,10 @@ export interface SaleLineItem {
   productName: string;
   qty: number;
   unitPrice: number;
+  warranty?: string;
 }
+
+export type PaymentMethod = "Cash" | "Online" | "Card";
 
 export interface Sale extends AuditFields {
   id: string;
@@ -101,7 +119,7 @@ export interface Sale extends AuditFields {
   customer: string;
   items: SaleLineItem[];
   amount: number;
-  payment: "Cash" | "Credit";
+  payment: PaymentMethod;
   status: "Paid" | "Refunded";
   cashierName: string;
 }

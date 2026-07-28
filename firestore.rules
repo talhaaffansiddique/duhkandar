@@ -40,6 +40,18 @@ service cloud.firestore {
             && myRole(shopId).permissions[key] == true);
     }
 
+    // Super Admin: the app owner only. A doc must exist at
+    // superAdmins/{uid} — created manually in the Firebase console, never
+    // through the app itself, so no client-side code path can grant it.
+    function isSuperAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/superAdmins/$(request.auth.uid));
+    }
+
+    match /superAdmins/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
     // users: self can read/create their own uid-keyed doc (bootstrap or
     // invite claim); Admins manage everyone within their own shop, including
     // email-keyed pending invites they created.
@@ -47,7 +59,8 @@ service cloud.firestore {
       allow read: if isSignedIn()
         && (request.auth.uid == userId
             || userId == request.auth.token.email
-            || (hasProfile() && myProfile().access == 'Admin' && resource.data.shopId == myProfile().shopId));
+            || (hasProfile() && myProfile().access == 'Admin' && resource.data.shopId == myProfile().shopId)
+            || isSuperAdmin());
       allow create: if isSignedIn() && request.auth.uid == userId;
       allow update: if (isSignedIn() && request.auth.uid == userId)
         || (hasProfile() && myProfile().access == 'Admin' && resource.data.shopId == myProfile().shopId);
@@ -56,16 +69,22 @@ service cloud.firestore {
     }
 
     // shops: created by whoever is about to own it (their profile doc
-    // doesn't exist yet at that instant); read/updated only by members.
+    // doesn't exist yet at that instant); read by any member. Update is
+    // open to any shop member (not just Admin) because POS checkout runs a
+    // transaction against this doc's receipt-counter fields for every
+    // cashier, not just Admins — the UI itself keeps company-profile fields
+    // read-only for non-Admins.
     match /shops/{shopId} {
       allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
-      allow read: if inShop(shopId);
-      allow update: if isAdminOfShop(shopId);
+      allow read: if inShop(shopId) || isSuperAdmin();
+      allow update: if inShop(shopId);
       allow delete: if false;
 
+      // Stock is decremented by anyone who can record a sale (POS
+      // checkout), not just inventory managers.
       match /products/{id} {
         allow read: if inShop(shopId);
-        allow write: if hasPermission(shopId, 'manageInventory');
+        allow write: if hasPermission(shopId, 'manageInventory') || hasPermission(shopId, 'recordSales');
       }
 
       match /purchases/{id} {
