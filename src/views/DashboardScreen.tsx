@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type UIEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useShopCollection, byCreatedDesc } from "../lib/firestore";
 import type { Sale, Product, Purchase } from "../types";
@@ -26,6 +26,7 @@ export default function DashboardScreen() {
   const { data: products } = useShopCollection<Product>("products");
   const { data: purchases } = useShopCollection<Purchase>("purchases");
   const [openReceipt, setOpenReceipt] = useState<Sale | null>(null);
+  const [visibleCount, setVisibleCount] = useState(10);
 
   const todaySales = useMemo(() => sales.filter((s) => isToday(s.createdAt) && s.status !== "Refunded"), [sales]);
   const todayTotal = useMemo(() => todaySales.reduce((sum, s) => sum + s.amount, 0), [todaySales]);
@@ -65,9 +66,18 @@ export default function DashboardScreen() {
     return entries.map(([name, value]) => ({ name, pct: Math.round((value / grand) * 100) }));
   }, [products]);
 
-  const recent = sales.slice(0, 25);
+  const recent = sales.slice(0, visibleCount);
   const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const colors = ["var(--accent)", "var(--warm)", "var(--line)"];
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  function handleTransactionsScroll(e: UIEvent<HTMLDivElement>) {
+    const el = e.currentTarget;
+    const reachedBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
+    if (reachedBottom && visibleCount < sales.length) {
+      setVisibleCount((v) => Math.min(sales.length, v + 10));
+    }
+  }
 
   return (
     <div>
@@ -75,21 +85,28 @@ export default function DashboardScreen() {
         Every number below is clickable — it opens the report or screen it was calculated from.
       </p>
       <div className="grid g4" style={{ marginBottom: 16 }}>
-        <div className="card kpi clickable" onClick={() => navigate("/reports")}>
+        <div
+          className="card kpi clickable"
+          onClick={() => navigate(`/reports?tab=financial&view=receivable&from=${todayStr}&to=${todayStr}`)}
+        >
           <div className="label">Today's sales</div>
           <div className="value">{money(todayTotal)}</div>
           <div className="delta">{todaySales.length} transactions</div>
         </div>
-        <div className="card kpi clickable" onClick={() => navigate("/reports")}>
+        <div
+          className="card kpi clickable"
+          onClick={() => navigate(`/reports?tab=financial&view=receivable&from=${todayStr}&to=${todayStr}`)}
+        >
           <div className="label">Today's profit</div>
           <div className="value">{money(todayProfit)}</div>
+          <div className="delta">as of today</div>
         </div>
-        <div className="card kpi clickable" onClick={() => navigate("/inventory")}>
+        <div className="card kpi clickable" onClick={() => navigate("/reports?tab=inventory&stock=Low+stock")}>
           <div className="label">Low stock items</div>
           <div className="value">{lowStock.length}</div>
           <div className="delta down">{lowStock.length > 0 ? "▼ needs reorder" : "all healthy"}</div>
         </div>
-        <div className="card kpi clickable" onClick={() => navigate("/purchases")}>
+        <div className="card kpi clickable" onClick={() => navigate("/purchases?status=Unpaid")}>
           <div className="label">Pending dues</div>
           <div className="value">{money(pendingDuesTotal)}</div>
           <div className="delta">{pendingDues.length} invoices</div>
@@ -148,11 +165,11 @@ export default function DashboardScreen() {
         {recent.length === 0 ? (
           <p style={{ fontSize: 12, color: "var(--muted)" }}>No sales recorded yet.</p>
         ) : (
-          <div className="table-wrap scroll5">
+          <div className="table-wrap scroll5" onScroll={handleTransactionsScroll}>
             <table>
               <thead>
                 <tr>
-                  <th>Time</th>
+                  <th>Date &amp; time</th>
                   <th>Customer</th>
                   <th>Items</th>
                   <th className="num">Amount</th>
@@ -162,7 +179,10 @@ export default function DashboardScreen() {
               <tbody>
                 {recent.map((s) => (
                   <tr key={s.id} className="clickrow" onClick={() => setOpenReceipt(s)}>
-                    <td>{new Date(s.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</td>
+                    <td>
+                      {new Date(s.createdAt).toLocaleDateString()}{" "}
+                      {new Date(s.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </td>
                     <td>{s.customer}</td>
                     <td>{s.items.reduce((n, it) => n + it.qty, 0)}</td>
                     <td className="num">{money(s.amount)}</td>
@@ -176,8 +196,8 @@ export default function DashboardScreen() {
           </div>
         )}
         <div className="foot-note">
-          <i /> Showing the last {recent.length} transactions, 5 at a time — scroll for more. Click a row to open
-          the original receipt.
+          <i /> Showing {recent.length} of {sales.length} transactions, 5 at a time — scroll to the bottom to load
+          10 more. Click a row to open the original receipt.
         </div>
       </div>
 

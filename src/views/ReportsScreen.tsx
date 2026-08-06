@@ -52,12 +52,14 @@ function SortHeader({
 }
 
 function FinancialTab() {
+  const [params] = useSearchParams();
   const { data: sales } = useShopCollection<Sale>("sales", byCreatedDesc());
   const { data: expenses } = useShopCollection<Expense>("expenses");
   const salesPath = useShopPath("sales");
-  const [from, setFrom] = useState(() => new Date(Date.now() - 6 * 86400000).toISOString().slice(0, 10));
-  const [to, setTo] = useState(() => new Date().toISOString().slice(0, 10));
+  const [from, setFrom] = useState(() => params.get("from") || new Date(Date.now() - 6 * 86400000).toISOString().slice(0, 10));
+  const [to, setTo] = useState(() => params.get("to") || new Date().toISOString().slice(0, 10));
   const [payment, setPayment] = useState("All payment types");
+  const [view, setView] = useState(() => params.get("view") || "receivable");
 
   const filtered = sales.filter((s) => {
     const d = new Date(s.createdAt).toISOString().slice(0, 10);
@@ -93,80 +95,95 @@ function FinancialTab() {
   return (
     <div>
       <div className="toolbar">
-        <input className="input" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-        <span style={{ color: "var(--muted)", fontSize: 13 }}>to</span>
-        <input className="input" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
-        <select className="input" value={payment} onChange={(e) => setPayment(e.target.value)}>
-          <option>All payment types</option>
-          <option>Cash</option>
-          <option>Online</option>
-          <option>Card</option>
+        <select className="input" value={view} onChange={(e) => setView(e.target.value)}>
+          <option value="receivable">Receivable (sales)</option>
+          <option value="payable">Payable (purchases)</option>
+          <option value="both">Both</option>
         </select>
-        <button
-          className="btn"
-          style={{ marginLeft: "auto" }}
-          onClick={() =>
-            exportRowsToPdf(
-              "Financial report",
-              ["Receipt", "Date", "Customer", "Amount", "Payment"],
-              sorted.map((s) => [s.receiptNo, new Date(s.createdAt).toLocaleDateString(), s.customer, money(s.amount), s.payment])
-            )
-          }
-        >
-          Export PDF
-        </button>
       </div>
-      <div className="grid g4" style={{ marginBottom: 14 }}>
-        <div className="card kpi"><div className="label">Gross sales</div><div className="value">{money(gross)}</div></div>
-        <div className="card kpi"><div className="label">Expenses</div><div className="value">{money(periodExpenses)}</div></div>
-        <div className="card kpi"><div className="label">Refunds</div><div className="value">{money(refunds)}</div></div>
-        <div className="card kpi"><div className="label">Net profit (P&amp;L)</div><div className="value">{money(netProfit)}</div></div>
-      </div>
-      <div className="card">
-        {sorted.length === 0 ? (
-          <p style={{ fontSize: 12, color: "var(--muted)" }}>No sales in this range.</p>
-        ) : (
-          <table>
-            <tbody>
-              <tr>
-                <SortHeader label="Receipt #" sortKey="receipt" headerProps={headerProps} />
-                <SortHeader label="Date" sortKey="date" headerProps={headerProps} />
-                <SortHeader label="Customer" sortKey="customer" headerProps={headerProps} />
-                <SortHeader label="Amount" sortKey="amount" headerProps={headerProps} num />
-                <SortHeader label="Payment" sortKey="payment" headerProps={headerProps} />
-                <th />
-              </tr>
-              {sorted.map((s) => (
-                <tr key={s.id}>
-                  <td>{s.receiptNo}</td>
-                  <td>{new Date(s.createdAt).toLocaleDateString()}</td>
-                  <td>{s.customer}</td>
-                  <td className="num">{money(s.amount)}</td>
-                  <td>{s.payment}</td>
-                  <td>
-                    {s.status !== "Refunded" ? (
-                      <button className="btn" style={{ padding: "4px 10px", fontSize: 12 }} onClick={() => refund(s.id)}>
-                        Refund
-                      </button>
-                    ) : (
-                      <span className="pill warn">Refunded</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-        <div className="foot-note"><i /> Net profit deducts recorded expenses from gross margin. Click any column header to sort.</div>
-      </div>
+
+      {(view === "receivable" || view === "both") && (
+        <>
+          <div className="toolbar">
+            <input className="input" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+            <span style={{ color: "var(--muted)", fontSize: 13 }}>to</span>
+            <input className="input" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+            <select className="input" value={payment} onChange={(e) => setPayment(e.target.value)}>
+              <option>All payment types</option>
+              <option>Cash</option>
+              <option>Online</option>
+              <option>Card</option>
+            </select>
+            <button
+              className="btn"
+              style={{ marginLeft: "auto" }}
+              onClick={() =>
+                exportRowsToPdf(
+                  "Financial report",
+                  ["Receipt", "Date", "Customer", "Amount", "Payment"],
+                  sorted.map((s) => [s.receiptNo, new Date(s.createdAt).toLocaleDateString(), s.customer, money(s.amount), s.payment])
+                )
+              }
+            >
+              Export PDF
+            </button>
+          </div>
+          <div className="grid g4" style={{ marginBottom: 14 }}>
+            <div className="card kpi"><div className="label">Gross sales</div><div className="value">{money(gross)}</div></div>
+            <div className="card kpi"><div className="label">Expenses</div><div className="value">{money(periodExpenses)}</div></div>
+            <div className="card kpi"><div className="label">Refunds</div><div className="value">{money(refunds)}</div></div>
+            <div className="card kpi"><div className="label">Net profit (P&amp;L)</div><div className="value">{money(netProfit)}</div></div>
+          </div>
+          <div className="card" style={{ marginBottom: view === "both" ? 16 : 0 }}>
+            {sorted.length === 0 ? (
+              <p style={{ fontSize: 12, color: "var(--muted)" }}>No sales in this range.</p>
+            ) : (
+              <table>
+                <tbody>
+                  <tr>
+                    <SortHeader label="Receipt #" sortKey="receipt" headerProps={headerProps} />
+                    <SortHeader label="Date" sortKey="date" headerProps={headerProps} />
+                    <SortHeader label="Customer" sortKey="customer" headerProps={headerProps} />
+                    <SortHeader label="Amount" sortKey="amount" headerProps={headerProps} num />
+                    <SortHeader label="Payment" sortKey="payment" headerProps={headerProps} />
+                    <th />
+                  </tr>
+                  {sorted.map((s) => (
+                    <tr key={s.id}>
+                      <td>{s.receiptNo}</td>
+                      <td>{new Date(s.createdAt).toLocaleDateString()}</td>
+                      <td>{s.customer}</td>
+                      <td className="num">{money(s.amount)}</td>
+                      <td>{s.payment}</td>
+                      <td>
+                        {s.status !== "Refunded" ? (
+                          <button className="btn" style={{ padding: "4px 10px", fontSize: 12 }} onClick={() => refund(s.id)}>
+                            Refund
+                          </button>
+                        ) : (
+                          <span className="pill warn">Refunded</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            <div className="foot-note"><i /> Net profit deducts recorded expenses from gross margin. Click any column header to sort.</div>
+          </div>
+        </>
+      )}
+
+      {(view === "payable" || view === "both") && <PurchaseTab />}
     </div>
   );
 }
 
 function InventoryTab() {
+  const [params] = useSearchParams();
   const { data: products } = useShopCollection<Product>("products");
   const [category, setCategory] = useState("All categories");
-  const [status, setStatus] = useState("All stock status");
+  const [status, setStatus] = useState(() => params.get("stock") || "All stock status");
   const categories = useMemo(() => ["All categories", ...new Set(products.map((p) => p.category))], [products]);
 
   function statusOf(p: Product) {

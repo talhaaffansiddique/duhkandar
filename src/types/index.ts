@@ -91,6 +91,15 @@ export interface PurchaseLineItem {
   unitCost: number;
 }
 
+export interface PurchasePayment {
+  amount: number;
+  paidAt: number;
+  note?: string;
+  recordedBy: string;
+}
+
+export type PurchaseStatus = "Paid" | "Partial" | "Unpaid";
+
 export interface Purchase extends AuditFields {
   id: string;
   supplierId: string;
@@ -100,7 +109,19 @@ export interface Purchase extends AuditFields {
   items: PurchaseLineItem[];
   total: number;
   attachmentUrl?: string;
-  status: "Paid" | "Partial" | "Unpaid";
+  status: PurchaseStatus;
+  payments?: PurchasePayment[];
+}
+
+export function purchasePaidTotal(p: Pick<Purchase, "payments">): number {
+  return (p.payments ?? []).reduce((s, pay) => s + pay.amount, 0);
+}
+
+export function purchaseStatus(p: Pick<Purchase, "payments" | "total">): PurchaseStatus {
+  const paid = purchasePaidTotal(p);
+  if (paid <= 0) return "Unpaid";
+  if (paid >= p.total) return "Paid";
+  return "Partial";
 }
 
 export interface SaleLineItem {
