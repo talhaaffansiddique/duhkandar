@@ -7,6 +7,7 @@ export const PERMISSION_KEYS = [
   "recordPurchases",
   "viewReports",
   "addExpenses",
+  "manageSettings",
 ] as const;
 export type PermissionKey = (typeof PERMISSION_KEYS)[number];
 export type PermissionSet = Record<PermissionKey, boolean>;

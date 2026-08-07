@@ -19,6 +19,7 @@ const PERMISSION_LABELS: Record<string, string> = {
   recordPurchases: "Record purchases",
   viewReports: "View reports",
   addExpenses: "Add expenses",
+  manageSettings: "Settings",
 };
 
 function money(n: number) {

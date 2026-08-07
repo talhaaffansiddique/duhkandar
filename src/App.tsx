@@ -42,11 +42,13 @@ function Shell() {
   const canSeeExpense = isAdmin || permissions.addExpenses;
   const canSeeReports = isAdmin || permissions.viewReports;
   const canSeeMaster = isAdmin;
+  const canSeeSettings = isAdmin || permissions.manageSettings;
 
-  // Every profile can always reach Settings (to see their own account) and
-  // whichever screens their permission set unlocks. This is also the
-  // fallback landing route so nobody with a narrow role gets stuck on a
-  // screen they can't see.
+  const hasAnyAccess =
+    canSeeDashboard || canSeePos || canSeeInventory || canSeePurchases || canSeeExpense || canSeeReports || canSeeMaster || canSeeSettings;
+
+  // Fallback landing route so a narrowly scoped role still lands somewhere
+  // it can actually see, instead of looping.
   const firstAllowedPath = canSeeDashboard
     ? "/"
     : canSeePos
@@ -59,7 +61,9 @@ function Shell() {
     ? "/expense"
     : canSeeReports
     ? "/reports"
-    : "/settings";
+    : canSeeSettings
+    ? "/settings"
+    : "/";
 
   function toggleTheme() {
     const next = theme === "dark" ? "light" : "dark";
@@ -109,9 +113,11 @@ function Shell() {
             <span className="dot" />Master
           </NavLink>
         )}
-        <NavLink to="/settings" className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
-          <span className="dot" />Settings
-        </NavLink>
+        {canSeeSettings && (
+          <NavLink to="/settings" className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
+            <span className="dot" />Settings
+          </NavLink>
+        )}
         <div className="railfoot">
           <span>{profile?.email}</span>
           <button className="btn signoutbtn" onClick={() => signOut()}>
@@ -130,17 +136,24 @@ function Shell() {
           </div>
         </div>
 
-        <Routes>
-          <Route path="/" element={canSeeDashboard ? <DashboardScreen /> : <Navigate to={firstAllowedPath} replace />} />
-          <Route path="/pos" element={canSeePos ? <PosScreen /> : <Navigate to={firstAllowedPath} replace />} />
-          <Route path="/inventory" element={canSeeInventory ? <InventoryScreen /> : <Navigate to={firstAllowedPath} replace />} />
-          <Route path="/purchases" element={canSeePurchases ? <PurchaseScreen /> : <Navigate to={firstAllowedPath} replace />} />
-          <Route path="/expense" element={canSeeExpense ? <ExpenseScreen /> : <Navigate to={firstAllowedPath} replace />} />
-          <Route path="/reports" element={canSeeReports ? <ReportsScreen /> : <Navigate to={firstAllowedPath} replace />} />
-          <Route path="/master" element={canSeeMaster ? <MasterScreen /> : <Navigate to={firstAllowedPath} replace />} />
-          <Route path="/settings" element={<SettingsScreen />} />
-          <Route path="*" element={<Navigate to={firstAllowedPath} replace />} />
-        </Routes>
+        {!hasAnyAccess ? (
+          <div className="center-fill">
+            No modules are enabled for your profile yet — ask your Admin to check at least one permission for your
+            role in Master &rarr; Roles &amp; permissions.
+          </div>
+        ) : (
+          <Routes>
+            <Route path="/" element={canSeeDashboard ? <DashboardScreen /> : <Navigate to={firstAllowedPath} replace />} />
+            <Route path="/pos" element={canSeePos ? <PosScreen /> : <Navigate to={firstAllowedPath} replace />} />
+            <Route path="/inventory" element={canSeeInventory ? <InventoryScreen /> : <Navigate to={firstAllowedPath} replace />} />
+            <Route path="/purchases" element={canSeePurchases ? <PurchaseScreen /> : <Navigate to={firstAllowedPath} replace />} />
+            <Route path="/expense" element={canSeeExpense ? <ExpenseScreen /> : <Navigate to={firstAllowedPath} replace />} />
+            <Route path="/reports" element={canSeeReports ? <ReportsScreen /> : <Navigate to={firstAllowedPath} replace />} />
+            <Route path="/master" element={canSeeMaster ? <MasterScreen /> : <Navigate to={firstAllowedPath} replace />} />
+            <Route path="/settings" element={canSeeSettings ? <SettingsScreen /> : <Navigate to={firstAllowedPath} replace />} />
+            <Route path="*" element={<Navigate to={firstAllowedPath} replace />} />
+          </Routes>
+        )}
       </div>
     </div>
   );
