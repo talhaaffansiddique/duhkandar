@@ -54,14 +54,19 @@ service cloud.firestore {
 
     // users: self can read/create their own uid-keyed doc (bootstrap or
     // invite claim); Admins manage everyone within their own shop, including
-    // email-keyed pending invites they created.
+    // email-keyed pending invites they created and — now that Admins set a
+    // local password up front via a secondary Auth app instance — brand-new
+    // uid-keyed docs for accounts that already exist in Firebase Auth but
+    // aren't the caller themselves.
     match /users/{userId} {
       allow read: if isSignedIn()
         && (request.auth.uid == userId
             || userId == request.auth.token.email
             || (hasProfile() && myProfile().access == 'Admin' && resource.data.shopId == myProfile().shopId)
             || isSuperAdmin());
-      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow create: if isSignedIn()
+        && (request.auth.uid == userId
+            || (hasProfile() && myProfile().access == 'Admin' && request.resource.data.shopId == myProfile().shopId));
       allow update: if (isSignedIn() && request.auth.uid == userId)
         || (hasProfile() && myProfile().access == 'Admin' && resource.data.shopId == myProfile().shopId);
       allow delete: if (hasProfile() && myProfile().access == 'Admin' && resource.data.shopId == myProfile().shopId)

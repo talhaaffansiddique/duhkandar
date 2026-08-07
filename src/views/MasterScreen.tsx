@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { doc, setDoc } from "firebase/firestore";
-import { db } from "../firebase/config";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { db, auth } from "../firebase/config";
 import { useShopCollection, useShopAuditedWrites, useShopUsers, byCreatedDesc } from "../lib/firestore";
 import { useAuth } from "../context/AuthContext";
-import { NO_PERMISSIONS, ALL_PERMISSIONS_ON } from "../lib/permissions";
+import { usePermissions, NO_PERMISSIONS, ALL_PERMISSIONS_ON } from "../lib/permissions";
+import { createEmployeeAuthAccount, generatePassword, likelyHasGoogleAccount } from "../lib/adminCreateUser";
 import { PERMISSION_KEYS } from "../types";
 import type { UserProfile, Supplier, Role, PermissionSet } from "../types";
 
@@ -25,17 +27,26 @@ function UsersTab() {
   const { data: users, loading } = useShopUsers();
   const { data: roles } = useShopCollection<Role>("roles");
   const { profile } = useAuth();
+  const { isAdmin } = usePermissions();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState(() => generatePassword());
+  const [showPassword, setShowPassword] = useState(false);
   const [access, setAccess] = useState<"Employee" | "Admin">("Employee");
   const [roleId, setRoleId] = useState(roles[0]?.id ?? "");
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [resetMsg, setResetMsg] = useState<string | null>(null);
 
   async function handleCreate() {
-    if (!name.trim() || !email.trim()) {
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!name.trim() || !trimmedEmail) {
       setErr("Name and email are required.");
+      return;
+    }
+    if (password.length < 6) {
+      setErr("Password must be at least 6 characters.");
       return;
     }
     if (!profile?.shopId) {
@@ -45,24 +56,38 @@ function UsersTab() {
     setSaving(true);
     setErr(null);
     try {
-      const key = email.trim().toLowerCase();
-      await setDoc(doc(db, "users", key), {
+      const uid = await createEmployeeAuthAccount(trimmedEmail, password);
+      await setDoc(doc(db, "users", uid), {
         name: name.trim(),
-        email: key,
+        email: trimmedEmail,
         access,
         roleId: access === "Employee" ? roleId : null,
-        status: "Invited",
+        status: "Active",
         shopId: profile.shopId,
         createdAt: Date.now(),
         createdBy: profile?.name || "Admin",
       });
       setName("");
       setEmail("");
+      setPassword(generatePassword());
     } catch (e) {
       console.error(e);
-      setErr("Could not create user. Try again.");
+      const code = (e as { code?: string })?.code || "";
+      if (code.includes("email-already-in-use")) setErr("An account with that email already exists.");
+      else setErr("Could not create user. Try again.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleResetPassword(userEmail: string) {
+    setResetMsg(null);
+    try {
+      await sendPasswordResetEmail(auth, userEmail);
+      setResetMsg(`Password reset email sent to ${userEmail}.`);
+    } catch (e) {
+      console.error(e);
+      setResetMsg("Could not send reset email. Try again.");
     }
   }
 
@@ -86,8 +111,10 @@ function UsersTab() {
                 <th>Email</th>
                 <th>Access</th>
                 <th>Profile</th>
+                <th>Login method</th>
                 <th>Status</th>
                 <th>Added</th>
+                {isAdmin && <th />}
               </tr>
               {users.map((u) => (
                 <tr key={u.id}>
@@ -98,18 +125,36 @@ function UsersTab() {
                   </td>
                   <td>{roleName(u)}</td>
                   <td>
+                    <span className="pill neutral">
+                      {likelyHasGoogleAccount(u.email) ? "Local + Google" : "Local only"}
+                    </span>
+                  </td>
+                  <td>
                     <span className={"pill " + (u.status === "Active" ? "good" : u.status === "Invited" ? "warn" : "neutral")}>
                       {u.status}
                     </span>
                   </td>
                   <td>{new Date(u.createdAt).toLocaleDateString()}</td>
+                  {isAdmin && (
+                    <td>
+                      <button
+                        className="btn"
+                        style={{ padding: "4px 10px", fontSize: 12 }}
+                        onClick={() => handleResetPassword(u.email)}
+                      >
+                        Reset password
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
         )}
+        {resetMsg && <p style={{ fontSize: 12, color: "var(--good)", marginTop: 8 }}>{resetMsg}</p>}
         <div className="foot-note">
           <i /> Admin always has complete rights; every other user must carry a profile from Roles &amp; permissions.
+          "Reset password" sends a password-reset email — Admin never sees or sets a live password after creation.
         </div>
       </div>
       <div className="card" style={{ marginTop: 14 }}>
@@ -126,12 +171,31 @@ function UsersTab() {
         </div>
         <div className="field-row">
           <div className="field">
+            <label>Local password</label>
+            <div style={{ display: "flex", gap: 6 }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{ flex: 1 }}
+              />
+              <button className="btn" type="button" onClick={() => setShowPassword((v) => !v)} title="Show password">
+                👁
+              </button>
+              <button className="btn" type="button" onClick={() => setPassword(generatePassword())} title="Generate a random password">
+                Generate
+              </button>
+            </div>
+          </div>
+          <div className="field">
             <label>Access level</label>
             <select value={access} onChange={(e) => setAccess(e.target.value as "Employee" | "Admin")}>
               <option>Employee</option>
               <option>Admin</option>
             </select>
           </div>
+        </div>
+        <div className="field-row">
           <div className="field">
             <label>Profile (employee only)</label>
             <select value={roleId} onChange={(e) => setRoleId(e.target.value)} disabled={access === "Admin"}>
@@ -149,8 +213,8 @@ function UsersTab() {
           {saving ? "Creating…" : "Create user"}
         </button>
         <p style={{ fontSize: 11, color: "var(--muted)", marginTop: 10 }}>
-          The user signs in themselves (email/password or Google) using this exact email — their account is
-          automatically matched to this profile on first login.
+          They can sign in with this email and password right away. If their email is a Google account, "Continue
+          with Google" works too — nothing extra to set up.
         </p>
       </div>
     </div>
