@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { sendPasswordResetEmail } from "firebase/auth";
@@ -40,6 +40,13 @@ function UsersTab() {
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [resetMsg, setResetMsg] = useState<string | null>(null);
+
+  // Roles may still be loading from Firestore when this component first
+  // mounts, so the initial useState default above can land on "" — backfill
+  // it once the list actually arrives instead of leaving roleId stuck empty.
+  useEffect(() => {
+    if (!roleId && roles[0]) setRoleId(roles[0].id);
+  }, [roleId, roles]);
 
   const [editUser, setEditUser] = useState<UserProfile | null>(null);
   const [editEmail, setEditEmail] = useState("");
