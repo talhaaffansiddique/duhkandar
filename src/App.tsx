@@ -35,8 +35,31 @@ function Shell() {
   const [theme, setTheme] = useState<"light" | "dark" | null>(null);
 
   const title = TITLES[location.pathname] || "Dukandar";
+  const canSeeDashboard = isAdmin || permissions.viewDashboard;
+  const canSeePos = isAdmin || permissions.recordSales;
+  const canSeeInventory = isAdmin || permissions.manageInventory;
   const canSeePurchases = isAdmin || permissions.recordPurchases;
+  const canSeeExpense = isAdmin || permissions.addExpenses;
+  const canSeeReports = isAdmin || permissions.viewReports;
   const canSeeMaster = isAdmin;
+
+  // Every profile can always reach Settings (to see their own account) and
+  // whichever screens their permission set unlocks. This is also the
+  // fallback landing route so nobody with a narrow role gets stuck on a
+  // screen they can't see.
+  const firstAllowedPath = canSeeDashboard
+    ? "/"
+    : canSeePos
+    ? "/pos"
+    : canSeeInventory
+    ? "/inventory"
+    : canSeePurchases
+    ? "/purchases"
+    : canSeeExpense
+    ? "/expense"
+    : canSeeReports
+    ? "/reports"
+    : "/settings";
 
   function toggleTheme() {
     const next = theme === "dark" ? "light" : "dark";
@@ -51,26 +74,36 @@ function Shell() {
           Dukandar
           <span className="shopname">{shop?.businessName || "Your shop"}</span>
         </div>
-        <NavLink to="/" end className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
-          <span className="dot" />Dashboard
-        </NavLink>
-        <NavLink to="/pos" className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
-          <span className="dot" />POS
-        </NavLink>
-        <NavLink to="/inventory" className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
-          <span className="dot" />Inventory
-        </NavLink>
+        {canSeeDashboard && (
+          <NavLink to="/" end className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
+            <span className="dot" />Dashboard
+          </NavLink>
+        )}
+        {canSeePos && (
+          <NavLink to="/pos" className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
+            <span className="dot" />POS
+          </NavLink>
+        )}
+        {canSeeInventory && (
+          <NavLink to="/inventory" className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
+            <span className="dot" />Inventory
+          </NavLink>
+        )}
         {canSeePurchases && (
           <NavLink to="/purchases" className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
             <span className="dot" />Purchases
           </NavLink>
         )}
-        <NavLink to="/expense" className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
-          <span className="dot" />Expense
-        </NavLink>
-        <NavLink to="/reports" className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
-          <span className="dot" />Reports
-        </NavLink>
+        {canSeeExpense && (
+          <NavLink to="/expense" className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
+            <span className="dot" />Expense
+          </NavLink>
+        )}
+        {canSeeReports && (
+          <NavLink to="/reports" className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
+            <span className="dot" />Reports
+          </NavLink>
+        )}
         {canSeeMaster && (
           <NavLink to="/master" className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
             <span className="dot" />Master
@@ -98,15 +131,15 @@ function Shell() {
         </div>
 
         <Routes>
-          <Route path="/" element={<DashboardScreen />} />
-          <Route path="/pos" element={<PosScreen />} />
-          <Route path="/inventory" element={<InventoryScreen />} />
-          <Route path="/purchases" element={canSeePurchases ? <PurchaseScreen /> : <Navigate to="/" replace />} />
-          <Route path="/expense" element={<ExpenseScreen />} />
-          <Route path="/reports" element={<ReportsScreen />} />
-          <Route path="/master" element={canSeeMaster ? <MasterScreen /> : <Navigate to="/" replace />} />
+          <Route path="/" element={canSeeDashboard ? <DashboardScreen /> : <Navigate to={firstAllowedPath} replace />} />
+          <Route path="/pos" element={canSeePos ? <PosScreen /> : <Navigate to={firstAllowedPath} replace />} />
+          <Route path="/inventory" element={canSeeInventory ? <InventoryScreen /> : <Navigate to={firstAllowedPath} replace />} />
+          <Route path="/purchases" element={canSeePurchases ? <PurchaseScreen /> : <Navigate to={firstAllowedPath} replace />} />
+          <Route path="/expense" element={canSeeExpense ? <ExpenseScreen /> : <Navigate to={firstAllowedPath} replace />} />
+          <Route path="/reports" element={canSeeReports ? <ReportsScreen /> : <Navigate to={firstAllowedPath} replace />} />
+          <Route path="/master" element={canSeeMaster ? <MasterScreen /> : <Navigate to={firstAllowedPath} replace />} />
           <Route path="/settings" element={<SettingsScreen />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to={firstAllowedPath} replace />} />
         </Routes>
       </div>
     </div>
