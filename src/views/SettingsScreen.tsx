@@ -22,7 +22,6 @@ function buildSeedData() {
     name: `Supplier ${i + 1} Traders`,
     contact: `03${(String(100000000 + i * 137)).slice(0, 9)}`,
     address: `Shop ${i + 1}, Sadar Market, Karachi`,
-    outstanding: (i % 4) * 3500,
   }));
   const categories = ["Sanitary ware", "Fittings", "Other"];
   const products = Array.from({ length: 10 }, (_, i) => ({

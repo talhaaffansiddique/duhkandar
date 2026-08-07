@@ -74,10 +74,10 @@ function Shell() {
   return (
     <div className="shell">
       <div className="rail">
-        <div className="brand">
+        <NavLink to={firstAllowedPath} className="brand" style={{ textDecoration: "none" }}>
           Dukandar
           <span className="shopname">{shop?.businessName || "Your shop"}</span>
-        </div>
+        </NavLink>
         {canSeeDashboard && (
           <NavLink to="/" end className={({ isActive }) => "navbtn" + (isActive ? " active" : "")}>
             <span className="dot" />Dashboard
@@ -119,6 +119,7 @@ function Shell() {
           </NavLink>
         )}
         <div className="railfoot">
+          <span className="railfoot-name">{profile?.name}</span>
           <span>{profile?.email}</span>
           <button className="btn signoutbtn" onClick={() => signOut()}>
             &#8618; Sign out

@@ -73,7 +73,6 @@ export interface Supplier extends AuditFields {
   name: string;
   contact: string;
   address: string;
-  outstanding: number;
 }
 
 export type WarrantyUnit = "Months" | "Years";

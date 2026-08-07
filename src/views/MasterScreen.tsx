@@ -8,8 +8,8 @@ import { useAuth } from "../context/AuthContext";
 import { usePermissions, NO_PERMISSIONS, ALL_PERMISSIONS_ON } from "../lib/permissions";
 import { createEmployeeAuthAccount, generatePassword, likelyHasGoogleAccount } from "../lib/adminCreateUser";
 import { PERMISSION_KEYS } from "../types";
-import type { UserProfile, Supplier, Role, PermissionSet } from "../types";
-import { nameWithStatus } from "../types";
+import type { UserProfile, Supplier, Role, PermissionSet, Purchase } from "../types";
+import { nameWithStatus, purchasePaidTotal } from "../types";
 import Modal from "../components/Modal";
 
 const PERMISSION_LABELS: Record<string, string> = {
@@ -437,6 +437,7 @@ function UsersTab() {
 
 function SuppliersTab() {
   const { data: suppliers, loading } = useShopCollection<Supplier>("suppliers", byCreatedDesc());
+  const { data: purchases } = useShopCollection<Purchase>("purchases");
   const { create } = useShopAuditedWrites("suppliers");
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
@@ -444,11 +445,17 @@ function SuppliersTab() {
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
+  function outstandingFor(supplierId: string) {
+    return purchases
+      .filter((p) => p.supplierId === supplierId)
+      .reduce((sum, p) => sum + Math.max(0, p.total - purchasePaidTotal(p)), 0);
+  }
+
   async function handleCreate() {
     if (!name.trim()) return;
     setSaving(true);
     try {
-      await create({ name: name.trim(), contact: contact.trim(), address: address.trim(), outstanding: 0 });
+      await create({ name: name.trim(), contact: contact.trim(), address: address.trim() });
       setName("");
       setContact("");
       setAddress("");
@@ -506,7 +513,7 @@ function SuppliersTab() {
                   <td>{s.name}</td>
                   <td>{s.contact || "—"}</td>
                   <td>{s.address || "—"}</td>
-                  <td className="num">{money(s.outstanding)}</td>
+                  <td className="num">{money(outstandingFor(s.id))}</td>
                   <td>{new Date(s.createdAt).toLocaleDateString()}</td>
                 </tr>
               ))}
@@ -514,7 +521,8 @@ function SuppliersTab() {
           </table>
         )}
         <div className="foot-note">
-          <i /> Suppliers added here appear immediately in the Purchases screen.
+          <i /> Suppliers added here appear immediately in the Purchases screen. Outstanding is what you still owe
+          this supplier — the unpaid balance across all their purchases.
         </div>
       </div>
     </div>
