@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useShopCollection, byCreatedDesc } from "../lib/firestore";
+import { useSortableRows } from "../hooks/useSortableRows";
+import SortHeader from "../components/SortHeader";
 import type { Product } from "../types";
 import AddProductModal from "../components/AddProductModal";
 
@@ -42,6 +44,20 @@ export default function InventoryScreen() {
     const matchesSearch =
       !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase());
     return matchesCategory && matchesSearch;
+  });
+
+  const { sorted, headerProps } = useSortableRows(filtered, (row, key) => {
+    switch (key) {
+      case "product": return row.name;
+      case "sku": return row.sku;
+      case "variants": return variantsLabel(row);
+      case "stock": return row.stock;
+      case "cost": return row.avgCost;
+      case "price": return row.price;
+      case "warranty": return warrantyLabel(row);
+      case "status": return stockStatus(row).label;
+      default: return "";
+    }
   });
 
   return (
@@ -87,16 +103,16 @@ export default function InventoryScreen() {
           <table>
             <tbody>
               <tr>
-                <th>Product</th>
-                <th>SKU</th>
-                <th>Variants</th>
-                <th className="num">Stock</th>
-                <th className="num">Cost (avg)</th>
-                <th className="num">Price</th>
-                <th>Warranty</th>
-                <th>Status</th>
+                <SortHeader label="Product" sortKey="product" headerProps={headerProps} />
+                <SortHeader label="SKU" sortKey="sku" headerProps={headerProps} />
+                <SortHeader label="Variants" sortKey="variants" headerProps={headerProps} />
+                <SortHeader label="Stock" sortKey="stock" headerProps={headerProps} num />
+                <SortHeader label="Cost (avg)" sortKey="cost" headerProps={headerProps} num />
+                <SortHeader label="Price" sortKey="price" headerProps={headerProps} num />
+                <SortHeader label="Warranty" sortKey="warranty" headerProps={headerProps} />
+                <SortHeader label="Status" sortKey="status" headerProps={headerProps} />
               </tr>
-              {filtered.map((p) => {
+              {sorted.map((p) => {
                 const status = stockStatus(p);
                 return (
                   <tr key={p.id} className="clickrow" onClick={() => { setEditing(p); setModalOpen(true); }}>

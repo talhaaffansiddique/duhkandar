@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useShopCollection, byCreatedDesc } from "../lib/firestore";
+import { useSortableRows } from "../hooks/useSortableRows";
+import SortHeader from "../components/SortHeader";
 import type { Purchase, Supplier } from "../types";
 import RecordPurchaseModal from "../components/RecordPurchaseModal";
 import Modal from "../components/Modal";
@@ -128,6 +130,19 @@ export default function PurchaseScreen() {
     return matchesSupplier && matchesStatus;
   });
 
+  const { sorted, headerProps } = useSortableRows(filtered, (row, key) => {
+    switch (key) {
+      case "date": return row.date;
+      case "supplier": return row.supplierName;
+      case "invoice": return row.invoiceNo;
+      case "items": return row.items.reduce((s, l) => s + l.qty, 0);
+      case "total": return row.total;
+      case "attachment": return row.attachmentUrl ? 1 : 0;
+      case "status": return row.status;
+      default: return "";
+    }
+  });
+
   return (
     <div>
       <div className="toolbar">
@@ -163,15 +178,15 @@ export default function PurchaseScreen() {
           <table>
             <tbody>
               <tr>
-                <th>Date</th>
-                <th>Supplier</th>
-                <th>Invoice</th>
-                <th className="num">Items</th>
-                <th className="num">Total</th>
-                <th>Attachment</th>
-                <th>Status</th>
+                <SortHeader label="Date" sortKey="date" headerProps={headerProps} />
+                <SortHeader label="Supplier" sortKey="supplier" headerProps={headerProps} />
+                <SortHeader label="Invoice" sortKey="invoice" headerProps={headerProps} />
+                <SortHeader label="Items" sortKey="items" headerProps={headerProps} num />
+                <SortHeader label="Total" sortKey="total" headerProps={headerProps} num />
+                <SortHeader label="Attachment" sortKey="attachment" headerProps={headerProps} />
+                <SortHeader label="Status" sortKey="status" headerProps={headerProps} />
               </tr>
-              {filtered.map((p) => (
+              {sorted.map((p) => (
                 <tr key={p.id}>
                   <td>{p.date}</td>
                   <td>{p.supplierName}</td>

@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { useShopCollection, useShopAuditedWrites, useShopUsers, byCreatedDesc } from "../lib/firestore";
 import { useAuth } from "../context/AuthContext";
+import { useSortableRows } from "../hooks/useSortableRows";
+import SortHeader from "../components/SortHeader";
 import { nameWithStatus } from "../types";
 import type { Expense } from "../types";
 
@@ -45,6 +47,8 @@ export default function ExpenseScreen() {
     });
     return Object.entries(totals).sort((a, b) => b[1] - a[1]);
   }, [thisMonth]);
+
+  const { sorted, headerProps } = useSortableRows(expenses, (row, key) => (key === "date" ? row.date : ""));
 
   async function handleSave() {
     if (amount <= 0) {
@@ -131,13 +135,13 @@ export default function ExpenseScreen() {
           <table>
             <tbody>
               <tr>
-                <th>Date</th>
+                <SortHeader label="Date" sortKey="date" headerProps={headerProps} />
                 <th>Category</th>
                 <th>Note</th>
                 <th className="num">Amount</th>
                 <th>Added by</th>
               </tr>
-              {expenses.map((e) => (
+              {sorted.map((e) => (
                 <tr key={e.id}>
                   <td>{e.date}</td>
                   <td>{e.category}</td>

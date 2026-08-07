@@ -7,6 +7,8 @@ import { useShopCollection, useShopAuditedWrites, useShopUsers, byCreatedDesc } 
 import { useAuth } from "../context/AuthContext";
 import { usePermissions, NO_PERMISSIONS, ALL_PERMISSIONS_ON } from "../lib/permissions";
 import { createEmployeeAuthAccount, generatePassword, likelyHasGoogleAccount } from "../lib/adminCreateUser";
+import { useSortableRows } from "../hooks/useSortableRows";
+import SortHeader from "../components/SortHeader";
 import { PERMISSION_KEYS } from "../types";
 import type { UserProfile, Supplier, Role, PermissionSet, Purchase } from "../types";
 import { nameWithStatus, purchasePaidTotal } from "../types";
@@ -180,6 +182,14 @@ function UsersTab() {
     return roles.find((r) => r.id === u.roleId)?.name ?? "No profile assigned";
   }
 
+  const { sorted: sortedUsers, headerProps: userHeaderProps } = useSortableRows(users, (row, key) => {
+    switch (key) {
+      case "name": return row.name;
+      case "email": return row.email;
+      default: return "";
+    }
+  });
+
   return (
     <div>
       <div className="card">
@@ -191,8 +201,8 @@ function UsersTab() {
           <table>
             <tbody>
               <tr>
-                <th>Name</th>
-                <th>Email</th>
+                <SortHeader label="Name" sortKey="name" headerProps={userHeaderProps} />
+                <SortHeader label="Email" sortKey="email" headerProps={userHeaderProps} />
                 <th>Access</th>
                 <th>Profile</th>
                 <th>Login method</th>
@@ -200,7 +210,7 @@ function UsersTab() {
                 <th>Added</th>
                 {isAdmin && <th />}
               </tr>
-              {users.map((u) => (
+              {sortedUsers.map((u) => (
                 <tr key={u.id}>
                   <td>{nameWithStatus(u.name, users)}</td>
                   <td>{u.email}</td>
@@ -451,6 +461,14 @@ function SuppliersTab() {
       .reduce((sum, p) => sum + Math.max(0, p.total - purchasePaidTotal(p)), 0);
   }
 
+  const { sorted: sortedSuppliers, headerProps: supplierHeaderProps } = useSortableRows(suppliers, (row, key) => {
+    switch (key) {
+      case "supplier": return row.name;
+      case "outstanding": return outstandingFor(row.id);
+      default: return "";
+    }
+  });
+
   async function handleCreate() {
     if (!name.trim()) return;
     setSaving(true);
@@ -502,13 +520,13 @@ function SuppliersTab() {
           <table>
             <tbody>
               <tr>
-                <th>Supplier</th>
+                <SortHeader label="Supplier" sortKey="supplier" headerProps={supplierHeaderProps} />
                 <th>Contact</th>
                 <th>Address</th>
-                <th className="num">Outstanding</th>
+                <SortHeader label="Outstanding" sortKey="outstanding" headerProps={supplierHeaderProps} num />
                 <th>Added</th>
               </tr>
-              {suppliers.map((s) => (
+              {sortedSuppliers.map((s) => (
                 <tr key={s.id}>
                   <td>{s.name}</td>
                   <td>{s.contact || "—"}</td>

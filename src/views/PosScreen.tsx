@@ -13,6 +13,8 @@ import {
   byCreatedDesc,
 } from "../lib/firestore";
 import { usePermissions } from "../lib/permissions";
+import { useSortableRows } from "../hooks/useSortableRows";
+import SortHeader from "../components/SortHeader";
 import { nameWithStatus } from "../types";
 import type { Product, Sale, SaleLineItem, PaymentMethod } from "../types";
 import Modal from "../components/Modal";
@@ -51,6 +53,7 @@ function SellTab() {
   const productsPath = useShopPath("products");
 
   const [search, setSearch] = useState("");
+  const [view, setView] = useState<"grid" | "list">("grid");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [customer, setCustomer] = useState("");
   const [payment, setPayment] = useState<PaymentMethod>("Cash");
@@ -63,6 +66,17 @@ function SellTab() {
     if (!term) return products;
     return products.filter((p) => p.name.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term));
   }, [products, search]);
+
+  const { sorted: sortedProducts, headerProps: productHeaderProps } = useSortableRows(filtered, (row, key) => {
+    switch (key) {
+      case "product": return row.name;
+      case "sku": return row.sku;
+      case "category": return row.category;
+      case "stock": return row.stock;
+      case "price": return row.price;
+      default: return "";
+    }
+  });
 
   const subtotal = cart.reduce((s, l) => s + l.qty * l.unitPrice, 0);
   const totalItemsCount = cart.reduce((s, l) => s + l.qty, 0);
@@ -136,26 +150,70 @@ function SellTab() {
     <div>
       <div className="poswrap">
         <div>
-          <input
-            className="input"
-            style={{ width: "100%", marginBottom: 12 }}
-            placeholder="Search products or SKU"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <div className="poscat">
-            {filtered.length === 0 ? (
-              <p style={{ fontSize: 12, color: "var(--muted)" }}>No products match.</p>
-            ) : (
-              filtered.map((p) => (
+          <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+            <input
+              className="input"
+              style={{ flex: 1 }}
+              placeholder="Search products or SKU"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <div className="viewtoggle">
+              <button
+                className={"viewtogglebtn" + (view === "list" ? " on" : "")}
+                onClick={() => setView("list")}
+                title="List view"
+                aria-label="List view"
+              >
+                ☰
+              </button>
+              <button
+                className={"viewtogglebtn" + (view === "grid" ? " on" : "")}
+                onClick={() => setView("grid")}
+                title="Grid view"
+                aria-label="Grid view"
+              >
+                ▦
+              </button>
+            </div>
+          </div>
+
+          {filtered.length === 0 ? (
+            <p style={{ fontSize: 12, color: "var(--muted)" }}>No products match.</p>
+          ) : view === "grid" ? (
+            <div className="poscat">
+              {filtered.map((p) => (
                 <button key={p.id} className="posproduct" onClick={() => addToCart(p)}>
                   <div className="pname">{p.name}</div>
                   <div className="pmeta">{p.sku}</div>
                   <div className="pprice">{money(p.price)}</div>
                 </button>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="table-wrap scroll5">
+              <table>
+                <tbody>
+                  <tr>
+                    <SortHeader label="Product" sortKey="product" headerProps={productHeaderProps} />
+                    <SortHeader label="SKU" sortKey="sku" headerProps={productHeaderProps} />
+                    <SortHeader label="Category" sortKey="category" headerProps={productHeaderProps} />
+                    <SortHeader label="Stock" sortKey="stock" headerProps={productHeaderProps} num />
+                    <SortHeader label="Price" sortKey="price" headerProps={productHeaderProps} num />
+                  </tr>
+                  {sortedProducts.map((p) => (
+                    <tr key={p.id} className="clickrow" onClick={() => addToCart(p)}>
+                      <td>{p.name}</td>
+                      <td>{p.sku}</td>
+                      <td>{p.category}</td>
+                      <td className="num">{p.stock}</td>
+                      <td className="num">{money(p.price)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         <div className="card">

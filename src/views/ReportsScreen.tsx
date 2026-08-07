@@ -4,6 +4,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useShopCollection, useShopPath, byCreatedDesc } from "../lib/firestore";
 import { useSortableRows } from "../hooks/useSortableRows";
+import SortHeader from "../components/SortHeader";
 import type { Sale, Product, Purchase, Expense } from "../types";
 
 function money(n: number) {
@@ -29,26 +30,6 @@ function exportRowsToPdf(title: string, columns: string[], rows: (string | numbe
     });
     pdf.save(`${title.replace(/\s+/g, "_")}.pdf`);
   });
-}
-
-function SortHeader({
-  label,
-  sortKey,
-  headerProps,
-  num,
-}: {
-  label: string;
-  sortKey: string;
-  headerProps: (key: string) => { className: string; onClick: () => void };
-  num?: boolean;
-}) {
-  const props = headerProps(sortKey);
-  return (
-    <th className={props.className + (num ? " num" : "")} onClick={props.onClick}>
-      {label}
-      <span className="arrow">▲▼</span>
-    </th>
-  );
 }
 
 function FinancialTab() {

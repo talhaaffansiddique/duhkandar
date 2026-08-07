@@ -124,6 +124,9 @@ tr:last-child td{border-bottom:none}
 .tabs2{display:flex; gap:4px; background:var(--surface-2); border-radius:8px; padding:3px; width:fit-content; margin-bottom:14px}
 .tab2{border:none;background:transparent;padding:6px 12px;border-radius:6px;font-size:12px;color:var(--muted);cursor:pointer}
 .tab2.on{background:var(--surface); color:var(--ink); box-shadow:0 0 0 1px var(--line)}
+.viewtoggle{display:flex; gap:2px; background:var(--surface-2); border-radius:8px; padding:3px; flex-shrink:0}
+.viewtogglebtn{border:none; background:transparent; width:32px; height:32px; border-radius:6px; font-size:15px; color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center}
+.viewtogglebtn.on{background:var(--surface); color:var(--accent); box-shadow:0 0 0 1px var(--line)}
 .foot-note{font-size:11px; color:var(--muted); margin-top:10px; display:flex; align-items:center; gap:5px}
 .foot-note i{width:5px;height:5px;border-radius:50%;background:var(--accent); display:inline-block; flex-shrink:0}
 .dropdown{position:absolute; right:0; top:36px; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:6px; width:180px; box-shadow:0 6px 20px rgba(0,0,0,.12); display:none; z-index:5}
