@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { db, auth } from "../firebase/config";
 import { useShopCollection, useShopAuditedWrites, useShopUsers, byCreatedDesc } from "../lib/firestore";
@@ -9,6 +9,8 @@ import { usePermissions, NO_PERMISSIONS, ALL_PERMISSIONS_ON } from "../lib/permi
 import { createEmployeeAuthAccount, generatePassword, likelyHasGoogleAccount } from "../lib/adminCreateUser";
 import { PERMISSION_KEYS } from "../types";
 import type { UserProfile, Supplier, Role, PermissionSet } from "../types";
+import { nameWithStatus } from "../types";
+import Modal from "../components/Modal";
 
 const PERMISSION_LABELS: Record<string, string> = {
   viewDashboard: "View dashboard",
@@ -38,6 +40,80 @@ function UsersTab() {
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [resetMsg, setResetMsg] = useState<string | null>(null);
+
+  const [editUser, setEditUser] = useState<UserProfile | null>(null);
+  const [editEmail, setEditEmail] = useState("");
+  const [editAccess, setEditAccess] = useState<"Employee" | "Admin">("Employee");
+  const [editRoleId, setEditRoleId] = useState("");
+  const [editStatus, setEditStatus] = useState<"Active" | "Inactive">("Active");
+  const [editCreatedAt, setEditCreatedAt] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
+  const [editErr, setEditErr] = useState<string | null>(null);
+  const [deleteUser, setDeleteUser] = useState<UserProfile | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  function openEdit(u: UserProfile) {
+    setEditUser(u);
+    setEditEmail(u.email);
+    setEditAccess(u.access === "Admin" ? "Admin" : "Employee");
+    setEditRoleId(u.roleId ?? "");
+    setEditStatus(u.status === "Inactive" ? "Inactive" : "Active");
+    setEditCreatedAt(new Date(u.createdAt).toISOString().slice(0, 10));
+    setEditErr(null);
+  }
+
+  async function saveEdit() {
+    if (!editUser || !profile) return;
+    const trimmedEmail = editEmail.trim().toLowerCase();
+    if (!trimmedEmail) {
+      setEditErr("Email is required.");
+      return;
+    }
+    setEditSaving(true);
+    setEditErr(null);
+    try {
+      const createdAtMs = new Date(editCreatedAt + "T00:00:00").getTime();
+      await updateDoc(doc(db, "users", editUser.id), {
+        email: trimmedEmail,
+        access: editAccess,
+        roleId: editAccess === "Employee" ? editRoleId || null : null,
+        status: editStatus,
+        createdAt: Number.isNaN(createdAtMs) ? editUser.createdAt : createdAtMs,
+        updatedAt: Date.now(),
+        updatedBy: profile.name || "Admin",
+      });
+      setEditUser(null);
+    } catch (e) {
+      console.error(e);
+      setEditErr("Could not save changes. Try again.");
+    } finally {
+      setEditSaving(false);
+    }
+  }
+
+  async function toggleActive(u: UserProfile) {
+    if (!profile) return;
+    await updateDoc(doc(db, "users", u.id), {
+      status: u.status === "Active" ? "Inactive" : "Active",
+      updatedAt: Date.now(),
+      updatedBy: profile.name || "Admin",
+    });
+  }
+
+  async function confirmDelete() {
+    if (!deleteUser || !profile) return;
+    setDeleting(true);
+    try {
+      await updateDoc(doc(db, "users", deleteUser.id), {
+        status: "Deleted",
+        updatedAt: Date.now(),
+        updatedBy: profile.name || "Admin",
+      });
+      setDeleteUser(null);
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   async function handleCreate() {
     const trimmedEmail = email.trim().toLowerCase();
@@ -118,7 +194,7 @@ function UsersTab() {
               </tr>
               {users.map((u) => (
                 <tr key={u.id}>
-                  <td>{u.name}</td>
+                  <td>{nameWithStatus(u.name, users)}</td>
                   <td>{u.email}</td>
                   <td>
                     <span className={"pill " + (u.access === "Admin" ? "good" : "neutral")}>{u.access}</span>
@@ -130,20 +206,58 @@ function UsersTab() {
                     </span>
                   </td>
                   <td>
-                    <span className={"pill " + (u.status === "Active" ? "good" : u.status === "Invited" ? "warn" : "neutral")}>
+                    <span
+                      className={
+                        "pill " +
+                        (u.status === "Active"
+                          ? "good"
+                          : u.status === "Invited"
+                          ? "warn"
+                          : u.status === "Inactive"
+                          ? "warn"
+                          : "bad")
+                      }
+                    >
                       {u.status}
                     </span>
                   </td>
                   <td>{new Date(u.createdAt).toLocaleDateString()}</td>
                   {isAdmin && (
                     <td>
-                      <button
-                        className="btn"
-                        style={{ padding: "4px 10px", fontSize: 12 }}
-                        onClick={() => handleResetPassword(u.email)}
-                      >
-                        Reset password
-                      </button>
+                      {u.status === "Deleted" ? (
+                        <span style={{ fontSize: 11, color: "var(--muted)" }}>Deleted — record kept for history</span>
+                      ) : (
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          <button
+                            className="btn"
+                            style={{ padding: "4px 10px", fontSize: 12 }}
+                            onClick={() => handleResetPassword(u.email)}
+                          >
+                            Reset password
+                          </button>
+                          <button className="btn" style={{ padding: "4px 10px", fontSize: 12 }} onClick={() => openEdit(u)}>
+                            Edit
+                          </button>
+                          {u.id !== profile?.id && (
+                            <>
+                              <button
+                                className="btn"
+                                style={{ padding: "4px 10px", fontSize: 12 }}
+                                onClick={() => toggleActive(u)}
+                              >
+                                {u.status === "Active" ? "Set inactive" : "Set active"}
+                              </button>
+                              <button
+                                className="btn danger"
+                                style={{ padding: "4px 10px", fontSize: 12 }}
+                                onClick={() => setDeleteUser(u)}
+                              >
+                                Delete
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </td>
                   )}
                 </tr>
@@ -217,6 +331,98 @@ function UsersTab() {
           with Google" works too — nothing extra to set up.
         </p>
       </div>
+
+      {editUser && (
+        <Modal
+          title={`Edit user — ${editUser.name}`}
+          onClose={() => setEditUser(null)}
+          footer={
+            <>
+              <button className="btn" onClick={() => setEditUser(null)}>
+                Cancel
+              </button>
+              <button className="btn primary" onClick={saveEdit} disabled={editSaving}>
+                {editSaving ? "Saving…" : "Save changes"}
+              </button>
+            </>
+          }
+        >
+          <div className="field-row">
+            <div className="field">
+              <label>Email</label>
+              <input value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+            </div>
+            <div className="field">
+              <label>Access level</label>
+              <select value={editAccess} onChange={(e) => setEditAccess(e.target.value as "Employee" | "Admin")}>
+                <option>Employee</option>
+                <option>Admin</option>
+              </select>
+            </div>
+          </div>
+          <div className="field-row">
+            <div className="field">
+              <label>Profile (employee only)</label>
+              <select value={editRoleId} onChange={(e) => setEditRoleId(e.target.value)} disabled={editAccess === "Admin"}>
+                <option value="">No profile assigned</option>
+                {roles.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label>Status</label>
+              <select value={editStatus} onChange={(e) => setEditStatus(e.target.value as "Active" | "Inactive")}>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div className="field-row">
+            <div className="field">
+              <label>Date created</label>
+              <input type="date" value={editCreatedAt} onChange={(e) => setEditCreatedAt(e.target.value)} />
+            </div>
+            <div className="field">
+              <label>Date modified</label>
+              <input
+                value={editUser.updatedAt ? new Date(editUser.updatedAt).toLocaleString() : "Never modified"}
+                disabled
+              />
+            </div>
+          </div>
+          {editErr && <p className="errortext">{editErr}</p>}
+          <p style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>
+            Editing email here only updates their profile record — it does not change their actual sign-in email
+            with Firebase, which can't be changed by another user.
+          </p>
+        </Modal>
+      )}
+
+      {deleteUser && (
+        <Modal
+          title="Delete user"
+          onClose={() => setDeleteUser(null)}
+          footer={
+            <>
+              <button className="btn" onClick={() => setDeleteUser(null)}>
+                Cancel
+              </button>
+              <button className="btn danger" onClick={confirmDelete} disabled={deleting}>
+                {deleting ? "Deleting…" : "Delete user"}
+              </button>
+            </>
+          }
+        >
+          <p style={{ fontSize: 13 }}>
+            Delete <strong>{deleteUser.name}</strong>? They will no longer be able to sign in, but every past record
+            that carries their name (sales, purchases, expenses) is kept and will show as{" "}
+            <strong>{deleteUser.name} (ex)</strong> so your history stays intact.
+          </p>
+        </Modal>
+      )}
     </div>
   );
 }

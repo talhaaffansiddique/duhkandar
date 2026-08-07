@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { useShopCollection, useShopAuditedWrites, byCreatedDesc } from "../lib/firestore";
+import { useShopCollection, useShopAuditedWrites, useShopUsers, byCreatedDesc } from "../lib/firestore";
 import { useAuth } from "../context/AuthContext";
+import { nameWithStatus } from "../types";
 import type { Expense } from "../types";
 
 const CATEGORIES: Expense["category"][] = ["Rent", "Utilities", "Salaries", "Transport", "Miscellaneous"];
@@ -20,6 +21,7 @@ export default function ExpenseScreen() {
   const { profile } = useAuth();
   const { data: expenses, loading } = useShopCollection<Expense>("expenses", byCreatedDesc());
   const { create } = useShopAuditedWrites("expenses");
+  const { data: users } = useShopUsers();
 
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [category, setCategory] = useState<Expense["category"]>("Rent");
@@ -141,7 +143,7 @@ export default function ExpenseScreen() {
                   <td>{e.category}</td>
                   <td>{e.note || "—"}</td>
                   <td className="num">{money(e.amount)}</td>
-                  <td>{e.addedByName}</td>
+                  <td>{nameWithStatus(e.addedByName, users)}</td>
                 </tr>
               ))}
             </tbody>

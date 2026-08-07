@@ -25,14 +25,27 @@ export interface Role extends AuditFields {
   permissions: PermissionSet;
 }
 
+export type UserStatus = "Active" | "Invited" | "Inactive" | "Deleted";
+
 export interface UserProfile extends AuditFields {
   id: string;
   name: string;
   email: string;
   access: AccessLevel;
   roleId?: string;
-  status: "Active" | "Invited" | "On leave" | "Disabled";
+  status: UserStatus;
   shopId: string;
+}
+
+/** Every stored `name` string (cashierName, recordedBy, addedByName, ...) should
+ * pass through this before rendering, so a deleted/inactive user's history
+ * still reads correctly instead of silently going stale. */
+export function nameWithStatus(name: string, users: Pick<UserProfile, "name" | "status">[]): string {
+  const match = users.find((u) => u.name === name);
+  if (!match) return name;
+  if (match.status === "Deleted") return `${name} (ex)`;
+  if (match.status === "Inactive") return `${name} (inactive)`;
+  return name;
 }
 
 export interface Shop {

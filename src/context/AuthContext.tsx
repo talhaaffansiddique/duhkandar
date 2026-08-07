@@ -88,6 +88,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (user) {
         try {
           const { profile: p, needsSetup } = await loadProfile(user);
+          if (p && (p.status === "Inactive" || p.status === "Deleted")) {
+            await firebaseSignOut(auth);
+            setFirebaseUser(null);
+            setProfile(null);
+            setNeedsShopSetup(false);
+            setError(
+              p.status === "Deleted"
+                ? "This account has been deleted. Contact your Admin."
+                : "This account is inactive. Contact your Admin."
+            );
+            setLoading(false);
+            return;
+          }
           setProfile(p);
           setNeedsShopSetup(needsSetup);
         } catch (e) {

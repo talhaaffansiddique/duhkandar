@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { uploadToCloudinary } from "../lib/cloudinary";
-import { useShopCollection, useShopAuditedWrites, useShopPath } from "../lib/firestore";
+import { useShopCollection, useShopAuditedWrites, useShopPath, useShopUsers } from "../lib/firestore";
 import { useAuth } from "../context/AuthContext";
 import Modal from "./Modal";
-import { purchasePaidTotal, purchaseStatus } from "../types";
+import { purchasePaidTotal, purchaseStatus, nameWithStatus } from "../types";
 import type { Product, Supplier, PurchaseLineItem, Purchase, PurchasePayment } from "../types";
 
 interface DraftLine {
@@ -24,6 +24,7 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
   const { data: products } = useShopCollection<Product>("products");
   const { create: createPurchase, update: updatePurchase } = useShopAuditedWrites("purchases");
   const productsPath = useShopPath("products");
+  const { data: users } = useShopUsers();
   const isEditing = !!existing;
 
   const [supplierId, setSupplierId] = useState(existing?.supplierId ?? suppliers[0]?.id ?? "");
@@ -37,6 +38,18 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
   const [payments, setPayments] = useState<PurchasePayment[]>(existing?.payments ?? []);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  // Suppliers/products may still be loading from Firestore when this modal first
+  // mounts, so the initial useState default above can land on "" — backfill it
+  // once the list actually arrives instead of leaving supplierId stuck empty.
+  useEffect(() => {
+    if (!isEditing && !supplierId && suppliers[0]) setSupplierId(suppliers[0].id);
+  }, [isEditing, supplierId, suppliers]);
+  useEffect(() => {
+    if (!isEditing && products[0]) {
+      setLines((prev) => prev.map((l) => (l.productId ? l : { ...l, productId: products[0].id })));
+    }
+  }, [isEditing, products]);
 
   const total = lines.reduce((s, l) => s + l.qty * l.unitCost, 0);
   const paidSoFar = purchasePaidTotal({ payments });
@@ -272,7 +285,7 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
             <div className="receipt-line" key={idx}>
               <span>
                 {new Date(p.paidAt).toLocaleDateString()} {new Date(p.paidAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                {p.note ? ` — ${p.note}` : ""} · {p.recordedBy}
+                {p.note ? ` — ${p.note}` : ""} · {nameWithStatus(p.recordedBy, users)}
               </span>
               <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span className="num">Rs {money(p.amount)}</span>

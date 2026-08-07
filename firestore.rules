@@ -100,7 +100,9 @@ service cloud.firestore {
       match /sales/{id} {
         allow read: if inShop(shopId);
         allow create: if hasPermission(shopId, 'recordSales');
-        allow update: if hasPermission(shopId, 'recordSales') || hasPermission(shopId, 'viewReports');
+        // Only an Admin can edit a past transaction; recording a new one is
+        // not an update, so cashiers with recordSales still check out fine.
+        allow update: if isAdminOfShop(shopId);
         allow delete: if isAdminOfShop(shopId);
       }
 

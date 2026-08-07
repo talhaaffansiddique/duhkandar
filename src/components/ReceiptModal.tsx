@@ -1,4 +1,6 @@
 import Modal from "./Modal";
+import { useShopUsers } from "../lib/firestore";
+import { nameWithStatus } from "../types";
 import type { Sale } from "../types";
 
 function money(n: number) {
@@ -6,6 +8,7 @@ function money(n: number) {
 }
 
 export default function ReceiptModal({ sale, onClose }: { sale: Sale; onClose: () => void }) {
+  const { data: users } = useShopUsers();
   return (
     <Modal
       title={`Receipt ${sale.receiptNo}`}
@@ -17,7 +20,7 @@ export default function ReceiptModal({ sale, onClose }: { sale: Sale; onClose: (
       }
     >
       <p style={{ fontSize: 12, color: "var(--muted)", margin: "-8px 0 14px" }}>
-        Sold {new Date(sale.createdAt).toLocaleString()} · Cashier: {sale.cashierName}
+        Sold {new Date(sale.createdAt).toLocaleString()} · Cashier: {nameWithStatus(sale.cashierName, users)}
       </p>
       {sale.items.map((it, i) => (
         <div className="receipt-line" key={i}>
