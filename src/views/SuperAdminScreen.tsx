@@ -3,6 +3,7 @@ import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
 import { useIsSuperAdmin, useAllShops, useAllUsers } from "../lib/superAdmin";
+import { CHANGELOG } from "../generated/changelog";
 
 function StoresTab({ onViewUsers }: { onViewUsers: (storeName: string) => void }) {
   const { shops, loading } = useAllShops();
@@ -167,80 +168,6 @@ function UsersTab({ storeFilter, setStoreFilter }: { storeFilter: string; setSto
   );
 }
 
-// Maintained by hand, one entry per shipped release — append a new entry
-// here (newest first) every time a change goes out, so the app's full
-// history stays visible to the app owner without digging through git.
-const CHANGELOG: { date: string; title: string; points: string[] }[] = [
-  {
-    date: "7 Aug 2026",
-    title: "Activity Tracker + this Changelog screen",
-    points: [
-      "New Master → Activity tab (per shop, Admin-only): every sign-in, sign-out, and screen visit, filterable by one or more users and one or more screens.",
-      "New Super Admin → Changelog tab (this one) so every future update is recorded in one place, visible only here.",
-    ],
-  },
-  {
-    date: "7 Aug 2026",
-    title: "Column sorting everywhere, POS grid/list toggle",
-    points: [
-      "POS → Sell: list-view alternative to the product grid with a toggle, every column sortable.",
-      "Inventory and Purchases: every column sortable. Expense log: only Date. Master → Users: only Name and Email. Master → Suppliers: only Supplier and Outstanding.",
-    ],
-  },
-  {
-    date: "7 Aug 2026",
-    title: "Sidebar polish + real supplier balances",
-    points: [
-      "Dukandar logo links back to Dashboard (or the user's first available screen).",
-      "Sidebar shows the signed-in user's name above their email.",
-      "Master → Suppliers “Outstanding” is now computed live from real purchases and payments instead of static seed data.",
-    ],
-  },
-  {
-    date: "7 Aug 2026",
-    title: "Settings permission + access-control gap closed",
-    points: [
-      "Added a seventh permission — Settings — to Roles & permissions, so it's gated like every other module.",
-      "Fixed Dashboard, POS, Inventory, Expense, and Reports being reachable by every signed-in user regardless of role — only Purchases and Master were actually enforcing permissions before this.",
-    ],
-  },
-  {
-    date: "7 Aug 2026",
-    title: "Master → Users: Active/Inactive/Delete, POS transactions, Purchases fixes",
-    points: [
-      "Admin-only edit, deactivate, and soft-delete per user row; deleted/inactive users keep all history, tagged “(ex)” / “(inactive)”.",
-      "New POS → Transactions tab: every sale, filterable, Admin-only edit. Checkout preview redesigned into a proper invoice.",
-      "Purchases: fixed a payment-amount overflow bug; split into read-only Items/Invoice popups; fixed two hidden bugs where a form field could silently save empty if opened before its data finished loading.",
-    ],
-  },
-  {
-    date: "6 Aug 2026",
-    title: "Dashboard drill-downs, Receivable/Payable reporting, purchase ledger",
-    points: [
-      "Dashboard KPI cards became real links into filtered Reports/Purchases views.",
-      "Purchases gained a full payment ledger — total, paid so far, remaining, a log of who paid what and when.",
-    ],
-  },
-  {
-    date: "28 Jul 2026",
-    title: "v2 feature set — POS, product variants, Super Admin, mobile layout",
-    points: [
-      "New POS screen with cart, receipt numbering, and atomic stock decrement.",
-      "Inventory: warranty value + unit, product size/colour variants.",
-      "This Super Admin panel introduced; mobile-responsive layout across the app.",
-    ],
-  },
-  {
-    date: "21 Jul 2026",
-    title: "Multi-tenant shop isolation",
-    points: ["Every shop's data fully separated under shops/{shopId}/…; guarded sample-data seeding and reset."],
-  },
-  {
-    date: "21 Jul 2026",
-    title: "Initial rebuild",
-    points: ["Dukandar rebuilt as a real app: Firebase auth, Firestore, role-based security rules, Cloudinary photo uploads."],
-  },
-];
 
 function ChangelogTab() {
   return (
