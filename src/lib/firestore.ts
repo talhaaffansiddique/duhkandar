@@ -3,6 +3,7 @@ import {
   collection,
   onSnapshot,
   orderBy,
+  limit,
   query,
   where,
   addDoc,
@@ -15,7 +16,10 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
-import type { UserProfile, Shop } from "../types";
+import { logActivity } from "./activityLog";
+import type { UserProfile, Shop, ActivityLogEntry } from "../types";
+
+export { logActivity };
 
 /**
  * Live-subscribes to a collection. Every write helper below stamps
@@ -96,6 +100,12 @@ export function useShopPath(name: string): string | null {
 export function useShopCollection<T>(name: string, constraints: QueryConstraint[] = []) {
   const path = useShopPath(name);
   return useCollection<T>(path, constraints);
+}
+
+/** Live subscription to a shop's Activity Tracker log, newest first, capped to the most recent 500 entries. */
+export function useShopActivityLog() {
+  const path = useShopPath("activityLog");
+  return useCollection<ActivityLogEntry>(path, [orderBy("at", "desc"), limit(500)]);
 }
 
 export function useShopAuditedWrites(name: string) {

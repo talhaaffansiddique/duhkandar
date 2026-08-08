@@ -166,3 +166,14 @@ export interface Expense extends AuditFields {
   note: string;
   addedByName: string;
 }
+
+/** One row in a shop's Activity Tracker: a sign-in, a sign-out, or a screen visit while signed in. */
+export interface ActivityLogEntry {
+  id: string;
+  userId: string;
+  userName: string;
+  type: "login" | "logout" | "screen";
+  /** Set only when type is "screen" — the module/page name, e.g. "Purchases". */
+  screen?: string;
+  at: number;
+}

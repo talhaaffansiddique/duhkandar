@@ -9,7 +9,16 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc, deleteDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { auth, db, googleProvider } from "../firebase/config";
+import { logActivity } from "../lib/activityLog";
 import type { UserProfile } from "../types";
+
+// Module-level (not React state): onAuthStateChanged fires on every page
+// load with a restored session, not just on a real sign-in action. This
+// flag is set right before an explicit signIn/signInWithGoogle call and
+// consumed once inside the listener, so only real logins get an Activity
+// Tracker entry — a page refresh doesn't. registerOwner/completeShopSetup
+// log directly instead, since they already have the fresh profile in hand.
+let pendingExplicitSignIn = false;
 
 interface AuthContextValue {
   firebaseUser: User | null;
@@ -101,6 +110,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setLoading(false);
             return;
           }
+          if (p && pendingExplicitSignIn) {
+            logActivity(p.shopId, { userId: p.id, userName: p.name, type: "login" });
+          }
+          pendingExplicitSignIn = false;
           setProfile(p);
           setNeedsShopSetup(needsSetup);
         } catch (e) {
@@ -136,8 +149,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signIn(email: string, password: string) {
     setError(null);
     try {
+      pendingExplicitSignIn = true;
       await signInWithEmailAndPassword(auth, email, password);
     } catch (e) {
+      pendingExplicitSignIn = false;
       setError(friendlyError(e));
       throw e;
     }
@@ -148,6 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       const p = await createShopAndProfile(cred.user, name, shopName);
+      logActivity(p.shopId, { userId: p.id, userName: p.name, type: "login" });
       setProfile(p);
       setNeedsShopSetup(false);
     } catch (e) {
@@ -159,8 +175,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signInWithGoogle() {
     setError(null);
     try {
+      pendingExplicitSignIn = true;
       await signInWithPopup(auth, googleProvider);
     } catch (e) {
+      pendingExplicitSignIn = false;
       setError(friendlyError(e));
       throw e;
     }
@@ -175,6 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "Owner",
         shopName
       );
+      logActivity(p.shopId, { userId: p.id, userName: p.name, type: "login" });
       setProfile(p);
       setNeedsShopSetup(false);
     } catch (e) {
@@ -184,6 +203,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
+    if (profile) {
+      logActivity(profile.shopId, { userId: profile.id, userName: profile.name, type: "logout" });
+    }
     await firebaseSignOut(auth);
   }
 

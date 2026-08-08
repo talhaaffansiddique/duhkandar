@@ -3,14 +3,14 @@ import { useSearchParams } from "react-router-dom";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { db, auth } from "../firebase/config";
-import { useShopCollection, useShopAuditedWrites, useShopUsers, byCreatedDesc } from "../lib/firestore";
+import { useShopCollection, useShopAuditedWrites, useShopUsers, useShopActivityLog, byCreatedDesc } from "../lib/firestore";
 import { useAuth } from "../context/AuthContext";
 import { usePermissions, NO_PERMISSIONS, ALL_PERMISSIONS_ON } from "../lib/permissions";
 import { createEmployeeAuthAccount, generatePassword, likelyHasGoogleAccount } from "../lib/adminCreateUser";
 import { useSortableRows } from "../hooks/useSortableRows";
 import SortHeader from "../components/SortHeader";
 import { PERMISSION_KEYS } from "../types";
-import type { UserProfile, Supplier, Role, PermissionSet, Purchase } from "../types";
+import type { UserProfile, Supplier, Role, PermissionSet, Purchase, ActivityLogEntry } from "../types";
 import { nameWithStatus, purchasePaidTotal } from "../types";
 import Modal from "../components/Modal";
 
@@ -23,6 +23,14 @@ const PERMISSION_LABELS: Record<string, string> = {
   addExpenses: "Add expenses",
   manageSettings: "Settings",
 };
+
+const ACTIVITY_SCREENS = ["Dashboard", "POS", "Inventory", "Purchases", "Expense", "Reports", "Master", "Settings"];
+
+function activityDescription(e: ActivityLogEntry): string {
+  if (e.type === "login") return "Signed in";
+  if (e.type === "logout") return "Signed out";
+  return `Viewed ${e.screen}`;
+}
 
 function money(n: number) {
   return "Rs " + Math.round(n).toLocaleString();
@@ -665,6 +673,99 @@ function RolesTab() {
   );
 }
 
+function ActivityTab() {
+  const { data: entries, loading } = useShopActivityLog();
+  const { data: users } = useShopUsers();
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const [selectedScreens, setSelectedScreens] = useState<Set<string>>(new Set());
+
+  function toggleUser(userId: string) {
+    setSelectedUsers((prev) => {
+      const next = new Set(prev);
+      next.has(userId) ? next.delete(userId) : next.add(userId);
+      return next;
+    });
+  }
+  function toggleScreen(screen: string) {
+    setSelectedScreens((prev) => {
+      const next = new Set(prev);
+      next.has(screen) ? next.delete(screen) : next.add(screen);
+      return next;
+    });
+  }
+
+  const filtered = entries.filter((e) => {
+    if (selectedUsers.size > 0 && !selectedUsers.has(e.userId)) return false;
+    if (selectedScreens.size > 0 && (e.type !== "screen" || !selectedScreens.has(e.screen || ""))) return false;
+    return true;
+  });
+
+  return (
+    <div>
+      <p style={{ fontSize: 12, color: "var(--muted)", margin: "0 0 8px" }}>Filter by user — pick one, a few, or leave all unselected to show everyone</p>
+      <div className="userchips">
+        {users.map((u) => (
+          <button
+            key={u.id}
+            className={"chip" + (selectedUsers.has(u.id) ? " on" : "")}
+            onClick={() => toggleUser(u.id)}
+            type="button"
+          >
+            {nameWithStatus(u.name, users)}
+          </button>
+        ))}
+      </div>
+      <p style={{ fontSize: 12, color: "var(--muted)", margin: "14px 0 8px" }}>Filter by screen</p>
+      <div className="userchips">
+        {ACTIVITY_SCREENS.map((s) => (
+          <button
+            key={s}
+            className={"chip" + (selectedScreens.has(s) ? " on" : "")}
+            onClick={() => toggleScreen(s)}
+            type="button"
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+
+      <div className="card" style={{ marginTop: 16 }}>
+        {loading ? (
+          <p style={{ fontSize: 12, color: "var(--muted)" }}>Loading…</p>
+        ) : filtered.length === 0 ? (
+          <p style={{ fontSize: 12, color: "var(--muted)" }}>No activity matches these filters.</p>
+        ) : (
+          <div className="table-wrap scroll5">
+            <table>
+              <tbody>
+                <tr>
+                  <th>Time</th>
+                  <th>User</th>
+                  <th>Activity</th>
+                </tr>
+                {filtered.map((e) => (
+                  <tr key={e.id}>
+                    <td>
+                      {new Date(e.at).toLocaleDateString()}{" "}
+                      {new Date(e.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </td>
+                    <td>{nameWithStatus(e.userName, users)}</td>
+                    <td>{activityDescription(e)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <div className="foot-note">
+          <i /> Every sign-in, sign-out, and screen visit in this shop, newest first — capped to the most recent 500
+          entries.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function MasterScreen() {
   const [params, setParams] = useSearchParams();
   const sub = params.get("sub") || "users";
@@ -672,15 +773,16 @@ export default function MasterScreen() {
   return (
     <div>
       <div className="tabs2">
-        {(["users", "suppliers", "roles"] as const).map((t) => (
+        {(["users", "suppliers", "roles", "activity"] as const).map((t) => (
           <button key={t} className={"tab2" + (sub === t ? " on" : "")} onClick={() => setParams({ sub: t })}>
-            {t === "users" ? "Users" : t === "suppliers" ? "Suppliers" : "Roles & permissions"}
+            {t === "users" ? "Users" : t === "suppliers" ? "Suppliers" : t === "roles" ? "Roles & permissions" : "Activity"}
           </button>
         ))}
       </div>
       {sub === "users" && <UsersTab />}
       {sub === "suppliers" && <SuppliersTab />}
       {sub === "roles" && <RolesTab />}
+      {sub === "activity" && <ActivityTab />}
     </div>
   );
 }

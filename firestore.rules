@@ -120,6 +120,15 @@ service cloud.firestore {
         allow read: if inShop(shopId);
         allow write: if isAdminOfShop(shopId);
       }
+
+      // Activity Tracker: any shop member can log their own sign-in,
+      // sign-out, and screen visits, but only an Admin can read the log
+      // back. Entries are append-only — never edited or deleted.
+      match /activityLog/{id} {
+        allow read: if isAdminOfShop(shopId);
+        allow create: if inShop(shopId) && request.resource.data.userId == request.auth.uid;
+        allow update, delete: if false;
+      }
     }
   }
 }
