@@ -15,6 +15,7 @@ import {
 import { usePermissions } from "../lib/permissions";
 import { useSortableRows } from "../hooks/useSortableRows";
 import SortHeader from "../components/SortHeader";
+import { logActivity } from "../lib/activityLog";
 import { nameWithStatus } from "../types";
 import type { Product, Sale, SaleLineItem, PaymentMethod } from "../types";
 import Modal from "../components/Modal";
@@ -131,6 +132,15 @@ function SellTab() {
       await Promise.all(
         cart.map((l) => updateDoc(doc(db, productsPath, l.productId), { stock: increment(-l.qty) }))
       );
+      if (profile) {
+        logActivity(profile.shopId, {
+          userId: profile.id,
+          userName: profile.name,
+          type: "action",
+          module: "POS",
+          description: `Completed sale ${receiptNo} · ${money(subtotal)}`,
+        });
+      }
       setCart([]);
       setCustomer("");
       setPayment("Cash");

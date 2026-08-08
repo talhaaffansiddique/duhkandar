@@ -3,6 +3,7 @@ import { useShopCollection, useShopAuditedWrites, useShopUsers, byCreatedDesc } 
 import { useAuth } from "../context/AuthContext";
 import { useSortableRows } from "../hooks/useSortableRows";
 import SortHeader from "../components/SortHeader";
+import { logActivity } from "../lib/activityLog";
 import { nameWithStatus } from "../types";
 import type { Expense } from "../types";
 
@@ -65,6 +66,15 @@ export default function ExpenseScreen() {
         note: note.trim(),
         addedByName: profile?.name || "Unknown",
       });
+      if (profile) {
+        logActivity(profile.shopId, {
+          userId: profile.id,
+          userName: profile.name,
+          type: "action",
+          module: "Expense",
+          description: `Added expense — ${category} · ${money(amount)}`,
+        });
+      }
       setAmount(0);
       setNote("");
     } catch (e) {
