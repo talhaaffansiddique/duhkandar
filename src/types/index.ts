@@ -167,16 +167,13 @@ export interface Expense extends AuditFields {
   addedByName: string;
 }
 
-/** One row in a shop's Activity Tracker: a sign-in, a sign-out, or a completed action (a sale rung up, an
- * expense logged, a user created, etc.) — not page views, just things that actually changed something. */
+/** One row in a shop's Activity Tracker: a sign-in, a sign-out, or a screen visit while signed in. */
 export interface ActivityLogEntry {
   id: string;
   userId: string;
   userName: string;
-  type: "login" | "logout" | "action";
-  /** Set only when type is "action" — the module the action happened in, e.g. "POS", used for the Screen filter. */
-  module?: string;
-  /** Set only when type is "action" — what happened, e.g. "Completed sale 26-08-07--001 · Rs 1,000". */
-  description?: string;
+  type: "login" | "logout" | "screen";
+  /** Set only when type is "screen" — the module/page name, e.g. "Purchases". */
+  screen?: string;
   at: number;
 }

@@ -4,7 +4,6 @@ import { db } from "../firebase/config";
 import { uploadToCloudinary } from "../lib/cloudinary";
 import { useShopCollection, useShopAuditedWrites, useShopPath, useShopUsers } from "../lib/firestore";
 import { useAuth } from "../context/AuthContext";
-import { logActivity } from "../lib/activityLog";
 import Modal from "./Modal";
 import { purchasePaidTotal, purchaseStatus, nameWithStatus } from "../types";
 import type { Product, Supplier, PurchaseLineItem, Purchase, PurchasePayment } from "../types";
@@ -156,17 +155,6 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
         await updatePurchase(existing.id, payload);
       } else {
         await createPurchase(payload);
-      }
-      if (profile) {
-        logActivity(profile.shopId, {
-          userId: profile.id,
-          userName: profile.name,
-          type: "action",
-          module: "Purchases",
-          description: isEditing
-            ? `Updated purchase — ${supplier.name} · Rs ${money(total)}`
-            : `Recorded purchase — ${supplier.name} · Rs ${money(total)}`,
-        });
       }
       onClose();
     } catch (e) {

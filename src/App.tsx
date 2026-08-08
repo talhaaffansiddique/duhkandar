@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate, NavLink, useLocation } from "react-router-dom";
 import { isFirebaseConfigured } from "./firebase/config";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { usePermissions } from "./lib/permissions";
 import { useShopDoc } from "./lib/firestore";
+import { logActivity } from "./lib/activityLog";
 import AuthScreen from "./views/AuthScreen";
 import ShopSetupScreen from "./views/ShopSetupScreen";
 import DashboardScreen from "./views/DashboardScreen";
@@ -64,6 +65,23 @@ function Shell() {
     : canSeeSettings
     ? "/settings"
     : "/";
+
+  // Activity Tracker: log every screen the signed-in user actually lands on.
+  // Skipped on the very first render of a given pathname only when it's a
+  // repeat of the last one logged (StrictMode/re-renders), not on real nav.
+  const lastLoggedPath = useRef<string | null>(null);
+  useEffect(() => {
+    if (!profile) return;
+    if (lastLoggedPath.current === location.pathname) return;
+    lastLoggedPath.current = location.pathname;
+    logActivity(profile.shopId, {
+      userId: profile.id,
+      userName: profile.name,
+      type: "screen",
+      screen: TITLES[location.pathname] || location.pathname,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, profile?.id]);
 
   function toggleTheme() {
     const next = theme === "dark" ? "light" : "dark";

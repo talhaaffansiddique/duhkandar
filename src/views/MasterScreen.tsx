@@ -9,7 +9,6 @@ import { usePermissions, NO_PERMISSIONS, ALL_PERMISSIONS_ON } from "../lib/permi
 import { createEmployeeAuthAccount, generatePassword, likelyHasGoogleAccount } from "../lib/adminCreateUser";
 import { useSortableRows } from "../hooks/useSortableRows";
 import SortHeader from "../components/SortHeader";
-import { logActivity } from "../lib/activityLog";
 import { PERMISSION_KEYS } from "../types";
 import type { UserProfile, Supplier, Role, PermissionSet, Purchase, ActivityLogEntry } from "../types";
 import { nameWithStatus, purchasePaidTotal } from "../types";
@@ -25,12 +24,12 @@ const PERMISSION_LABELS: Record<string, string> = {
   manageSettings: "Settings",
 };
 
-const ACTIVITY_MODULES = ["POS", "Inventory", "Purchases", "Expense", "Master"];
+const ACTIVITY_SCREENS = ["Dashboard", "POS", "Inventory", "Purchases", "Expense", "Reports", "Master", "Settings"];
 
 function activityDescription(e: ActivityLogEntry): string {
   if (e.type === "login") return "Signed in";
   if (e.type === "logout") return "Signed out";
-  return e.description || "—";
+  return `Viewed ${e.screen}`;
 }
 
 function money(n: number) {
@@ -101,13 +100,6 @@ function UsersTab() {
         updatedAt: Date.now(),
         updatedBy: profile.name || "Admin",
       });
-      logActivity(profile.shopId, {
-        userId: profile.id,
-        userName: profile.name,
-        type: "action",
-        module: "Master",
-        description: `Edited user ${editUser.name}`,
-      });
       setEditUser(null);
     } catch (e) {
       console.error(e);
@@ -119,18 +111,10 @@ function UsersTab() {
 
   async function toggleActive(u: UserProfile) {
     if (!profile) return;
-    const nextStatus = u.status === "Active" ? "Inactive" : "Active";
     await updateDoc(doc(db, "users", u.id), {
-      status: nextStatus,
+      status: u.status === "Active" ? "Inactive" : "Active",
       updatedAt: Date.now(),
       updatedBy: profile.name || "Admin",
-    });
-    logActivity(profile.shopId, {
-      userId: profile.id,
-      userName: profile.name,
-      type: "action",
-      module: "Master",
-      description: `Set ${u.name} ${nextStatus.toLowerCase()}`,
     });
   }
 
@@ -142,13 +126,6 @@ function UsersTab() {
         status: "Deleted",
         updatedAt: Date.now(),
         updatedBy: profile.name || "Admin",
-      });
-      logActivity(profile.shopId, {
-        userId: profile.id,
-        userName: profile.name,
-        type: "action",
-        module: "Master",
-        description: `Deleted user ${deleteUser.name}`,
       });
       setDeleteUser(null);
     } finally {
@@ -183,13 +160,6 @@ function UsersTab() {
         shopId: profile.shopId,
         createdAt: Date.now(),
         createdBy: profile?.name || "Admin",
-      });
-      logActivity(profile.shopId, {
-        userId: profile.id,
-        userName: profile.name,
-        type: "action",
-        module: "Master",
-        description: `Created user ${name.trim()}`,
       });
       setName("");
       setEmail("");
@@ -484,7 +454,6 @@ function UsersTab() {
 }
 
 function SuppliersTab() {
-  const { profile } = useAuth();
   const { data: suppliers, loading } = useShopCollection<Supplier>("suppliers", byCreatedDesc());
   const { data: purchases } = useShopCollection<Purchase>("purchases");
   const { create } = useShopAuditedWrites("suppliers");
@@ -513,15 +482,6 @@ function SuppliersTab() {
     setSaving(true);
     try {
       await create({ name: name.trim(), contact: contact.trim(), address: address.trim() });
-      if (profile) {
-        logActivity(profile.shopId, {
-          userId: profile.id,
-          userName: profile.name,
-          type: "action",
-          module: "Master",
-          description: `Added supplier ${name.trim()}`,
-        });
-      }
       setName("");
       setContact("");
       setAddress("");
@@ -596,7 +556,6 @@ function SuppliersTab() {
 }
 
 function RolesTab() {
-  const { profile } = useAuth();
   const { data: roles, loading } = useShopCollection<Role>("roles", byCreatedDesc());
   const { create, update } = useShopAuditedWrites("roles");
   const [showForm, setShowForm] = useState(false);
@@ -611,15 +570,6 @@ function RolesTab() {
     setSaving(true);
     try {
       await create({ name: newName.trim(), permissions: newPerms });
-      if (profile) {
-        logActivity(profile.shopId, {
-          userId: profile.id,
-          userName: profile.name,
-          type: "action",
-          module: "Master",
-          description: `Created role ${newName.trim()}`,
-        });
-      }
       setNewName("");
       setNewPerms({ ...NO_PERMISSIONS });
       setShowForm(false);
@@ -634,16 +584,6 @@ function RolesTab() {
   }
   async function saveEdit(roleId: string) {
     await update(roleId, { permissions: editPerms });
-    if (profile) {
-      const roleName = roles.find((r) => r.id === roleId)?.name ?? "role";
-      logActivity(profile.shopId, {
-        userId: profile.id,
-        userName: profile.name,
-        type: "action",
-        module: "Master",
-        description: `Edited ${roleName}'s permissions`,
-      });
-    }
     setEditingId(null);
   }
 
@@ -737,7 +677,7 @@ function ActivityTab() {
   const { data: entries, loading } = useShopActivityLog();
   const { data: users } = useShopUsers();
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
-  const [selectedModules, setSelectedModules] = useState<Set<string>>(new Set());
+  const [selectedScreens, setSelectedScreens] = useState<Set<string>>(new Set());
 
   function toggleUser(userId: string) {
     setSelectedUsers((prev) => {
@@ -746,17 +686,17 @@ function ActivityTab() {
       return next;
     });
   }
-  function toggleModule(module: string) {
-    setSelectedModules((prev) => {
+  function toggleScreen(screen: string) {
+    setSelectedScreens((prev) => {
       const next = new Set(prev);
-      next.has(module) ? next.delete(module) : next.add(module);
+      next.has(screen) ? next.delete(screen) : next.add(screen);
       return next;
     });
   }
 
   const filtered = entries.filter((e) => {
     if (selectedUsers.size > 0 && !selectedUsers.has(e.userId)) return false;
-    if (selectedModules.size > 0 && (e.type !== "action" || !selectedModules.has(e.module || ""))) return false;
+    if (selectedScreens.size > 0 && (e.type !== "screen" || !selectedScreens.has(e.screen || ""))) return false;
     return true;
   });
 
@@ -777,14 +717,14 @@ function ActivityTab() {
       </div>
       <p style={{ fontSize: 12, color: "var(--muted)", margin: "14px 0 8px" }}>Filter by screen</p>
       <div className="userchips">
-        {ACTIVITY_MODULES.map((m) => (
+        {ACTIVITY_SCREENS.map((s) => (
           <button
-            key={m}
-            className={"chip" + (selectedModules.has(m) ? " on" : "")}
-            onClick={() => toggleModule(m)}
+            key={s}
+            className={"chip" + (selectedScreens.has(s) ? " on" : "")}
+            onClick={() => toggleScreen(s)}
             type="button"
           >
-            {m}
+            {s}
           </button>
         ))}
       </div>
@@ -801,7 +741,6 @@ function ActivityTab() {
                 <tr>
                   <th>Time</th>
                   <th>User</th>
-                  <th>Screen</th>
                   <th>Activity</th>
                 </tr>
                 {filtered.map((e) => (
@@ -811,7 +750,6 @@ function ActivityTab() {
                       {new Date(e.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </td>
                     <td>{nameWithStatus(e.userName, users)}</td>
-                    <td>{e.module || "—"}</td>
                     <td>{activityDescription(e)}</td>
                   </tr>
                 ))}
@@ -820,8 +758,8 @@ function ActivityTab() {
           </div>
         )}
         <div className="foot-note">
-          <i /> Every sign-in, sign-out, and completed entry in this shop, newest first — capped to the most recent
-          500 entries.
+          <i /> Every sign-in, sign-out, and screen visit in this shop, newest first — capped to the most recent 500
+          entries.
         </div>
       </div>
     </div>
