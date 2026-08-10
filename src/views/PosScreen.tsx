@@ -236,12 +236,14 @@ function SellTab() {
                   <input
                     type="number"
                     min={1}
-                    value={l.qty}
+                    value={l.qty || ""}
+                    onFocus={(e) => e.target.select()}
                     onChange={(e) => updateLine(idx, { qty: Math.max(1, Number(e.target.value)) })}
                   />
                   <input
                     type="number"
-                    value={l.unitPrice}
+                    value={l.unitPrice || ""}
+                    onFocus={(e) => e.target.select()}
                     onChange={(e) => updateLine(idx, { unitPrice: Math.max(0, Number(e.target.value)) })}
                   />
                   <input value={l.warranty} onChange={(e) => updateLine(idx, { warranty: e.target.value })} />
@@ -457,12 +459,14 @@ function EditSaleModal({ sale, onClose }: { sale: Sale; onClose: () => void }) {
           <input
             type="number"
             min={1}
-            value={it.qty}
+            value={it.qty || ""}
+            onFocus={(e) => e.target.select()}
             onChange={(e) => updateItem(idx, { qty: Math.max(1, Number(e.target.value)) })}
           />
           <input
             type="number"
-            value={it.unitPrice}
+            value={it.unitPrice || ""}
+            onFocus={(e) => e.target.select()}
             onChange={(e) => updateItem(idx, { unitPrice: Math.max(0, Number(e.target.value)) })}
           />
           <input value={it.warranty ?? ""} onChange={(e) => updateItem(idx, { warranty: e.target.value })} />

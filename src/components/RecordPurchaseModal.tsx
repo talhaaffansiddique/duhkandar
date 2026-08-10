@@ -268,14 +268,16 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
           )}
           <input
             type="number"
-            value={l.qty}
+            value={l.qty || ""}
             readOnly={isEditing}
+            onFocus={(e) => e.target.select()}
             onChange={(e) => updateLine(idx, { qty: Number(e.target.value) })}
           />
           <input
             type="number"
-            value={l.unitCost}
+            value={l.unitCost || ""}
             readOnly={isEditing}
+            onFocus={(e) => e.target.select()}
             onChange={(e) => updateLine(idx, { unitCost: Number(e.target.value) })}
           />
           <input value={money(l.qty * l.unitCost)} readOnly />
@@ -359,7 +361,12 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
         <div className="field-row" style={{ alignItems: "flex-end" }}>
           <div className="field">
             <label>Payment amount</label>
-            <input type="number" value={newPaymentAmount || ""} onChange={(e) => setNewPaymentAmount(Number(e.target.value))} />
+            <input
+              type="number"
+              value={newPaymentAmount || ""}
+              onFocus={(e) => e.target.select()}
+              onChange={(e) => setNewPaymentAmount(Number(e.target.value))}
+            />
           </div>
           <div className="field">
             <label>Date</label>

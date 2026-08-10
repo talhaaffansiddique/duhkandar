@@ -131,7 +131,8 @@ export default function AddProductModal({
             <input
               type="number"
               min={0}
-              value={warrantyValue}
+              value={warrantyValue || ""}
+              onFocus={(e) => e.target.select()}
               onChange={(e) => setWarrantyValue(Math.max(0, Number(e.target.value)))}
               style={{ flex: 1 }}
             />
@@ -145,15 +146,15 @@ export default function AddProductModal({
       <div className="field-row">
         <div className="field">
           <label>Cost price</label>
-          <input type="number" value={cost} onChange={(e) => setCost(Number(e.target.value))} />
+          <input type="number" value={cost || ""} onFocus={(e) => e.target.select()} onChange={(e) => setCost(Number(e.target.value))} />
         </div>
         <div className="field">
           <label>Selling price</label>
-          <input type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} />
+          <input type="number" value={price || ""} onFocus={(e) => e.target.select()} onChange={(e) => setPrice(Number(e.target.value))} />
         </div>
         <div className="field">
           <label>{existing ? "Stock on hand" : "Opening stock"}</label>
-          <input type="number" value={stock} onChange={(e) => setStock(Number(e.target.value))} />
+          <input type="number" value={stock || ""} onFocus={(e) => e.target.select()} onChange={(e) => setStock(Number(e.target.value))} />
         </div>
       </div>
 
@@ -174,7 +175,8 @@ export default function AddProductModal({
           <input value={v.colour} onChange={(e) => updateVariant(idx, { colour: e.target.value })} placeholder="Beige" />
           <input
             type="number"
-            value={v.stock}
+            value={v.stock || ""}
+            onFocus={(e) => e.target.select()}
             onChange={(e) => updateVariant(idx, { stock: Math.max(0, Number(e.target.value)) })}
           />
           <button className="btn" style={{ padding: "4px 8px", fontSize: 12 }} onClick={() => removeVariant(idx)}>

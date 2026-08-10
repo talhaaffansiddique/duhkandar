@@ -94,7 +94,7 @@ export default function ExpenseScreen() {
           </div>
           <div className="field">
             <label>Amount (Rs)</label>
-            <input type="number" value={amount || ""} onChange={(e) => setAmount(Number(e.target.value))} />
+            <input type="number" value={amount || ""} onFocus={(e) => e.target.select()} onChange={(e) => setAmount(Number(e.target.value))} />
           </div>
           <div className="field">
             <label>Note</label>

@@ -7,6 +7,29 @@ export interface ChangelogEntry {
 }
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    "date": "10 Aug 2026",
+    "title": "Regenerate changelog snapshot",
+    "points": []
+  },
+  {
+    "date": "10 Aug 2026",
+    "title": "Record purchase: auto-generated invoice #, blank supplier/product by default, due-date terms",
+    "points": [
+      "Invoice # is now pre-filled with an auto-generated yy-mm-dd--INV-0001",
+      "number (same daily-reset style as POS receipt numbers), derived from",
+      "today's existing purchases so it self-corrects without a separate atomic",
+      "counter. Stays editable — typing in the field stops it from auto-updating.",
+      "Supplier and product start blank (\"Select supplier\" / \"Select product\")",
+      "instead of silently defaulting to the first item in the list.",
+      "Save now validates all mandatory fields: supplier, date, and per line a",
+      "product, a quantity above zero, and a unit cost above zero.",
+      "New \"Payment due\" selector (No due date / 1 day / week / month / year) —",
+      "leaving the payment amount blank still records the purchase as Unpaid to",
+      "pay later, and if a term is picked the computed due date shows next to",
+      "Status in both the create modal and the read-only Invoice popup."
+    ]
+  },
+  {
     "date": "08 Aug 2026",
     "title": "Auto-generate the Super Admin Changelog from git history on every build",
     "points": [
