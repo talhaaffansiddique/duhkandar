@@ -8,6 +8,20 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
   {
     "date": "08 Aug 2026",
+    "title": "Auto-generate the Super Admin Changelog from git history on every build",
+    "points": [
+      "Replaced the hand-maintained CHANGELOG array (which required remembering",
+      "to append an entry every time something shipped, and had already fallen",
+      "behind) with scripts/generate-changelog.mjs: a prebuild step that reads",
+      "git log and writes src/generated/changelog.ts fresh on every `npm run dev`",
+      "and `npm run build`. SuperAdminScreen now imports from there instead. The",
+      "changelog is now guaranteed to match what actually shipped, since it's",
+      "derived from the same commits that get deployed rather than a second",
+      "manually-updated copy."
+    ]
+  },
+  {
+    "date": "08 Aug 2026",
     "title": "Revert \"Activity Tracker: log completed entries instead of screen views\"",
     "points": [
       "This reverts commit f088a8047a567eef22ce6628c34c02e5108cef90."
