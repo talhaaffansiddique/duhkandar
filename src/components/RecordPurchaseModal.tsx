@@ -35,13 +35,26 @@ function peekNextInvoiceNo(purchases: Purchase[]): string {
   return `${prefix}${String(maxSeq + 1).padStart(4, "0")}`;
 }
 
-function addPaymentTerm(dateStr: string, term: PaymentTerm): string {
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+/** Days: 1-30 out. Weeks: 1-30 out. Years: 1-10 out. Months: `value` is the
+ * target calendar month by name (1-12), not a count — jumps to the next
+ * time that month comes around after `dateStr`. */
+function computeDueDate(dateStr: string, term: PaymentTerm | "", value: number): string {
+  if (!term || !value) return "";
   const d = new Date(dateStr + "T00:00:00");
   if (Number.isNaN(d.getTime())) return "";
-  if (term === "Day") d.setDate(d.getDate() + 1);
-  else if (term === "Week") d.setDate(d.getDate() + 7);
-  else if (term === "Month") d.setMonth(d.getMonth() + 1);
-  else if (term === "Year") d.setFullYear(d.getFullYear() + 1);
+  if (term === "Day") d.setDate(d.getDate() + value);
+  else if (term === "Week") d.setDate(d.getDate() + value * 7);
+  else if (term === "Year") d.setFullYear(d.getFullYear() + value);
+  else if (term === "Month") {
+    const targetMonth = value - 1;
+    const year = targetMonth <= d.getMonth() ? d.getFullYear() + 1 : d.getFullYear();
+    d.setFullYear(year, targetMonth, d.getDate());
+  }
   return d.toISOString().slice(0, 10);
 }
 
@@ -66,6 +79,7 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
   const [attachmentUrl, setAttachmentUrl] = useState(existing?.attachmentUrl ?? "");
   const [payments, setPayments] = useState<PurchasePayment[]>(existing?.payments ?? []);
   const [paymentTerm, setPaymentTerm] = useState<PaymentTerm | "">(existing?.paymentTerm ?? "");
+  const [paymentTermValue, setPaymentTermValue] = useState<number>(existing?.paymentTermValue ?? 1);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -76,7 +90,12 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
     if (!isEditing && !invoiceNoTouched) setInvoiceNo(peekNextInvoiceNo(purchases));
   }, [isEditing, invoiceNoTouched, purchases]);
 
-  const dueDate = paymentTerm ? addPaymentTerm(date, paymentTerm) : "";
+  function selectPaymentTerm(term: PaymentTerm | "") {
+    setPaymentTerm(term);
+    setPaymentTermValue(term === "Month" ? new Date().getMonth() + 1 : 1);
+  }
+
+  const dueDate = computeDueDate(date, paymentTerm, paymentTermValue);
 
   const total = lines.reduce((s, l) => s + l.qty * l.unitCost, 0);
   const paidSoFar = purchasePaidTotal({ payments });
@@ -180,7 +199,7 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
         payments,
         status: derivedStatus,
         ...(attachmentUrl ? { attachmentUrl } : {}),
-        ...(paymentTerm ? { paymentTerm, dueDate } : {}),
+        ...(paymentTerm ? { paymentTerm, paymentTermValue, dueDate } : {}),
       };
 
       if (isEditing) {
@@ -326,15 +345,65 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
       </div>
 
       {remaining > 0 && (
-        <div className="field" style={{ maxWidth: 220, marginBottom: 10 }}>
-          <label>Payment due (optional)</label>
-          <select value={paymentTerm} onChange={(e) => setPaymentTerm(e.target.value as PaymentTerm | "")}>
-            <option value="">No due date</option>
-            <option value="Day">1 day</option>
-            <option value="Week">1 week</option>
-            <option value="Month">1 month</option>
-            <option value="Year">1 year</option>
-          </select>
+        <div className="field-row" style={{ marginBottom: 10 }}>
+          <div className="field" style={{ maxWidth: 160 }}>
+            <label>Payment due (optional)</label>
+            <select value={paymentTerm} onChange={(e) => selectPaymentTerm(e.target.value as PaymentTerm | "")}>
+              <option value="">No due date</option>
+              <option value="Day">Days</option>
+              <option value="Week">Weeks</option>
+              <option value="Month">Month</option>
+              <option value="Year">Years</option>
+            </select>
+          </div>
+          {paymentTerm === "Day" && (
+            <div className="field" style={{ maxWidth: 140 }}>
+              <label>Number of days</label>
+              <select value={paymentTermValue} onChange={(e) => setPaymentTermValue(Number(e.target.value))}>
+                {Array.from({ length: 30 }, (_, i) => i + 1).map((n) => (
+                  <option key={n} value={n}>
+                    {n} day{n > 1 ? "s" : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {paymentTerm === "Week" && (
+            <div className="field" style={{ maxWidth: 140 }}>
+              <label>Number of weeks</label>
+              <select value={paymentTermValue} onChange={(e) => setPaymentTermValue(Number(e.target.value))}>
+                {Array.from({ length: 30 }, (_, i) => i + 1).map((n) => (
+                  <option key={n} value={n}>
+                    {n} week{n > 1 ? "s" : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {paymentTerm === "Month" && (
+            <div className="field" style={{ maxWidth: 160 }}>
+              <label>Due in month</label>
+              <select value={paymentTermValue} onChange={(e) => setPaymentTermValue(Number(e.target.value))}>
+                {MONTH_NAMES.map((name, i) => (
+                  <option key={name} value={i + 1}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {paymentTerm === "Year" && (
+            <div className="field" style={{ maxWidth: 140 }}>
+              <label>Number of years</label>
+              <select value={paymentTermValue} onChange={(e) => setPaymentTermValue(Number(e.target.value))}>
+                {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                  <option key={n} value={n}>
+                    {n} year{n > 1 ? "s" : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
       )}
 

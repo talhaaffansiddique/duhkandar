@@ -8,6 +8,22 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
   {
     "date": "10 Aug 2026",
+    "title": "Fix numeric inputs stuck on 0 on mobile (tap didn't clear/select the value)",
+    "points": [
+      "On mobile browsers, tapping into a number input showing a literal \"0\"",
+      "doesn't select or clear it the way desktop focus sometimes does, so typing",
+      "appended instead of replacing (0 -> 05) and a single backspace left \"0\"",
+      "behind. Applied the same fix everywhere a numeric field can start at 0:",
+      "value={x || \"\"} so a zero renders as an empty, typeable field instead of a",
+      "literal \"0\", plus onFocus={e => e.target.select()} so any pre-filled value",
+      "gets selected on tap/click and typing replaces it outright. Covers",
+      "Purchases (qty, unit cost, payment amount), Inventory (cost, price, stock,",
+      "warranty, variant stock), POS (cart qty/price, transaction edit qty/price),",
+      "and Expense (amount)."
+    ]
+  },
+  {
+    "date": "10 Aug 2026",
     "title": "Regenerate changelog snapshot",
     "points": []
   },

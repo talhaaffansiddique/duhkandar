@@ -127,7 +127,10 @@ export interface Purchase extends AuditFields {
   payments?: PurchasePayment[];
   /** How long after `date` the balance is due, e.g. "Month" — set alongside dueDate, kept so the term stays editable. */
   paymentTerm?: PaymentTerm;
-  /** Computed due date (date + paymentTerm), ISO yyyy-mm-dd. */
+  /** The number paired with paymentTerm: days (1-30), weeks (1-30), years (1-10), or — for
+   * "Month" — the target calendar month (1-12, Jan-Dec) rather than a count. */
+  paymentTermValue?: number;
+  /** Computed due date (date + paymentTerm/paymentTermValue), ISO yyyy-mm-dd. */
   dueDate?: string;
 }
 
