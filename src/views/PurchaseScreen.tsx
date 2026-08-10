@@ -97,7 +97,12 @@ function InvoiceModal({
       </div>
       <div className="postotal-line grand">
         <span>Status</span>
-        <span className="num">{purchase.status}</span>
+        <span className="num">
+          {purchase.status}
+          {purchase.dueDate && purchase.status !== "Paid"
+            ? ` · Due ${new Date(purchase.dueDate + "T00:00:00").toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" })}`
+            : ""}
+        </span>
       </div>
 
       {purchase.attachmentUrl && (

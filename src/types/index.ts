@@ -112,6 +112,7 @@ export interface PurchasePayment {
 }
 
 export type PurchaseStatus = "Paid" | "Partial" | "Unpaid";
+export type PaymentTerm = "Day" | "Week" | "Month" | "Year";
 
 export interface Purchase extends AuditFields {
   id: string;
@@ -124,6 +125,10 @@ export interface Purchase extends AuditFields {
   attachmentUrl?: string;
   status: PurchaseStatus;
   payments?: PurchasePayment[];
+  /** How long after `date` the balance is due, e.g. "Month" — set alongside dueDate, kept so the term stays editable. */
+  paymentTerm?: PaymentTerm;
+  /** Computed due date (date + paymentTerm), ISO yyyy-mm-dd. */
+  dueDate?: string;
 }
 
 export function purchasePaidTotal(p: Pick<Purchase, "payments">): number {

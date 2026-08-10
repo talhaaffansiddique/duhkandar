@@ -6,7 +6,7 @@ import { useShopCollection, useShopAuditedWrites, useShopPath, useShopUsers } fr
 import { useAuth } from "../context/AuthContext";
 import Modal from "./Modal";
 import { purchasePaidTotal, purchaseStatus, nameWithStatus } from "../types";
-import type { Product, Supplier, PurchaseLineItem, Purchase, PurchasePayment } from "../types";
+import type { Product, Supplier, PurchaseLineItem, Purchase, PurchasePayment, PaymentTerm } from "../types";
 
 interface DraftLine {
   productId: string;
@@ -18,38 +18,65 @@ function money(n: number) {
   return Math.round(n).toLocaleString();
 }
 
+/** Next invoice number for today, derived from today's existing purchases rather than a
+ * separate atomic counter — invoice numbers here are editable/advisory, not a legal
+ * receipt sequence, so a best-effort "highest seen + 1" is enough and self-corrects. */
+function peekNextInvoiceNo(purchases: Purchase[]): string {
+  const now = new Date();
+  const y = String(now.getFullYear()).slice(-2);
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  const prefix = `${y}-${m}-${d}--INV-`;
+  const maxSeq = purchases.reduce((max, p) => {
+    if (!p.invoiceNo?.startsWith(prefix)) return max;
+    const seq = parseInt(p.invoiceNo.slice(prefix.length), 10);
+    return Number.isFinite(seq) && seq > max ? seq : max;
+  }, 0);
+  return `${prefix}${String(maxSeq + 1).padStart(4, "0")}`;
+}
+
+function addPaymentTerm(dateStr: string, term: PaymentTerm): string {
+  const d = new Date(dateStr + "T00:00:00");
+  if (Number.isNaN(d.getTime())) return "";
+  if (term === "Day") d.setDate(d.getDate() + 1);
+  else if (term === "Week") d.setDate(d.getDate() + 7);
+  else if (term === "Month") d.setMonth(d.getMonth() + 1);
+  else if (term === "Year") d.setFullYear(d.getFullYear() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
 export default function RecordPurchaseModal({ onClose, existing }: { onClose: () => void; existing?: Purchase }) {
   const { profile } = useAuth();
   const { data: suppliers } = useShopCollection<Supplier>("suppliers");
   const { data: products } = useShopCollection<Product>("products");
+  const { data: purchases } = useShopCollection<Purchase>("purchases");
   const { create: createPurchase, update: updatePurchase } = useShopAuditedWrites("purchases");
   const productsPath = useShopPath("products");
   const { data: users } = useShopUsers();
   const isEditing = !!existing;
 
-  const [supplierId, setSupplierId] = useState(existing?.supplierId ?? suppliers[0]?.id ?? "");
+  const [supplierId, setSupplierId] = useState(existing?.supplierId ?? "");
   const [invoiceNo, setInvoiceNo] = useState(existing?.invoiceNo ?? "");
+  const [invoiceNoTouched, setInvoiceNoTouched] = useState(isEditing);
   const [date, setDate] = useState(existing?.date ?? new Date().toISOString().slice(0, 10));
   const [lines, setLines] = useState<DraftLine[]>(
-    existing ? existing.items.map((it) => ({ productId: it.productId, qty: it.qty, unitCost: it.unitCost })) : [{ productId: products[0]?.id ?? "", qty: 1, unitCost: 0 }]
+    existing ? existing.items.map((it) => ({ productId: it.productId, qty: it.qty, unitCost: it.unitCost })) : [{ productId: "", qty: 1, unitCost: 0 }]
   );
   const [attachMode, setAttachMode] = useState<"file" | "camera" | "url">("file");
   const [attachmentUrl, setAttachmentUrl] = useState(existing?.attachmentUrl ?? "");
   const [payments, setPayments] = useState<PurchasePayment[]>(existing?.payments ?? []);
+  const [paymentTerm, setPaymentTerm] = useState<PaymentTerm | "">(existing?.paymentTerm ?? "");
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  // Suppliers/products may still be loading from Firestore when this modal first
-  // mounts, so the initial useState default above can land on "" — backfill it
-  // once the list actually arrives instead of leaving supplierId stuck empty.
+  // New purchase only: suggest the next invoice number for today, derived from
+  // today's existing purchases. Keeps suggesting as that list loads/updates,
+  // but stops the moment the user actually edits the field themselves.
   useEffect(() => {
-    if (!isEditing && !supplierId && suppliers[0]) setSupplierId(suppliers[0].id);
-  }, [isEditing, supplierId, suppliers]);
-  useEffect(() => {
-    if (!isEditing && products[0]) {
-      setLines((prev) => prev.map((l) => (l.productId ? l : { ...l, productId: products[0].id })));
-    }
-  }, [isEditing, products]);
+    if (!isEditing && !invoiceNoTouched) setInvoiceNo(peekNextInvoiceNo(purchases));
+  }, [isEditing, invoiceNoTouched, purchases]);
+
+  const dueDate = paymentTerm ? addPaymentTerm(date, paymentTerm) : "";
 
   const total = lines.reduce((s, l) => s + l.qty * l.unitCost, 0);
   const paidSoFar = purchasePaidTotal({ payments });
@@ -64,7 +91,7 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
     setLines((prev) => prev.map((l, i) => (i === idx ? { ...l, ...patch } : l)));
   }
   function addLine() {
-    setLines((prev) => [...prev, { productId: products[0]?.id ?? "", qty: 1, unitCost: 0 }]);
+    setLines((prev) => [...prev, { productId: "", qty: 1, unitCost: 0 }]);
   }
   function removeLine(idx: number) {
     setLines((prev) => prev.filter((_, i) => i !== idx));
@@ -107,11 +134,15 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
   async function handleSave() {
     const supplier = suppliers.find((s) => s.id === supplierId);
     if (!supplier) {
-      setErr("Add a supplier in Master first.");
+      setErr("Choose a supplier first.");
       return;
     }
-    if (lines.some((l) => !l.productId || l.qty <= 0)) {
-      setErr("Every line needs a product and a quantity above zero.");
+    if (!date) {
+      setErr("Pick a date.");
+      return;
+    }
+    if (lines.some((l) => !l.productId || l.qty <= 0 || l.unitCost <= 0)) {
+      setErr("Every line needs a product, a quantity above zero, and a unit cost above zero.");
       return;
     }
     setSaving(true);
@@ -149,6 +180,7 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
         payments,
         status: derivedStatus,
         ...(attachmentUrl ? { attachmentUrl } : {}),
+        ...(paymentTerm ? { paymentTerm, dueDate } : {}),
       };
 
       if (isEditing) {
@@ -185,9 +217,9 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
     >
       <div className="field-row">
         <div className="field">
-          <label>Supplier</label>
+          <label>Supplier *</label>
           <select value={supplierId} onChange={(e) => setSupplierId(e.target.value)}>
-            {suppliers.length === 0 && <option value="">Add a supplier in Master first</option>}
+            <option value="">{suppliers.length === 0 ? "Add a supplier in Master first" : "Select supplier"}</option>
             {suppliers.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
@@ -197,19 +229,26 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
         </div>
         <div className="field">
           <label>Invoice #</label>
-          <input value={invoiceNo} onChange={(e) => setInvoiceNo(e.target.value)} placeholder="INV-7802" />
+          <input
+            value={invoiceNo}
+            onChange={(e) => {
+              setInvoiceNo(e.target.value);
+              setInvoiceNoTouched(true);
+            }}
+            placeholder="26-08-10--INV-0001"
+          />
         </div>
         <div className="field">
-          <label>Date</label>
+          <label>Date *</label>
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
       </div>
 
       <label style={{ fontSize: 12, color: "var(--muted)", display: "block", margin: "4px 0 6px" }}>Line items</label>
       <div className="linerow" style={{ fontSize: 11, color: "var(--muted)" }}>
-        <span>Product</span>
-        <span>Qty</span>
-        <span>Unit cost</span>
+        <span>Product *</span>
+        <span>Qty *</span>
+        <span>Unit cost *</span>
         <span>Subtotal</span>
         <span />
       </div>
@@ -219,7 +258,7 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
             <input value={l.qty + " × " + (products.find((p) => p.id === l.productId)?.name ?? "")} readOnly />
           ) : (
             <select value={l.productId} onChange={(e) => updateLine(idx, { productId: e.target.value })}>
-              {products.length === 0 && <option value="">Add products first</option>}
+              <option value="">{products.length === 0 ? "Add products first" : "Select product"}</option>
               {products.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
@@ -277,7 +316,25 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
       <div className="foot-note" style={{ margin: "6px 0 10px" }}>
         <i />
         Status: <strong style={{ marginLeft: 4 }}>{derivedStatus}</strong>
+        {dueDate && (
+          <span style={{ marginLeft: 4 }}>
+            · Due {new Date(dueDate + "T00:00:00").toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" })}
+          </span>
+        )}
       </div>
+
+      {remaining > 0 && (
+        <div className="field" style={{ maxWidth: 220, marginBottom: 10 }}>
+          <label>Payment due (optional)</label>
+          <select value={paymentTerm} onChange={(e) => setPaymentTerm(e.target.value as PaymentTerm | "")}>
+            <option value="">No due date</option>
+            <option value="Day">1 day</option>
+            <option value="Week">1 week</option>
+            <option value="Month">1 month</option>
+            <option value="Year">1 year</option>
+          </select>
+        </div>
+      )}
 
       {payments.length > 0 && (
         <div style={{ marginBottom: 10 }}>
@@ -316,6 +373,11 @@ export default function RecordPurchaseModal({ onClose, existing }: { onClose: ()
             + Add payment
           </button>
         </div>
+      )}
+      {!isEditing && remaining > 0 && payments.length === 0 && (
+        <p style={{ fontSize: 11, color: "var(--muted)", margin: "-4px 0 10px" }}>
+          Leave the payment amount blank and just click Save purchase to record this as unpaid and pay later.
+        </p>
       )}
 
       <label style={{ fontSize: 12, color: "var(--muted)", display: "block", margin: "10px 0 6px" }}>Attach invoice</label>
